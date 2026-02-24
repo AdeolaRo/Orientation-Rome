@@ -271,18 +271,7 @@
     </style>
 </head>
 <body>
-    <!-- Loading Spinner -->
-    <div class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-white bg-opacity-75" style="z-index: 9999; display: none;" id="loadingSpinner">
-        <div class="text-center">
-            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
-                <span class="visually-hidden">Chargement...</span>
-            </div>
-            <h5 class="mt-3 text-primary">Chargement des données ROME...</h5>
-            <p class="text-muted" id="loadingStatus">Initialisation</p>
-        </div>
-    </div>
-
-    <!-- Navigation -->
+       <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-gradient-primary fixed-top shadow">
         <div class="container">
             <a class="navbar-brand fw-bold" href="#">
@@ -1142,11 +1131,9 @@
                 setupNavigation();
                 setupEvents();
                 document.getElementById('updateDate').textContent = new Date().toLocaleDateString('fr-FR');
-                showLoading(false);
-            } catch (error) {
+               } catch (error) {
                 clearTimeout(timeoutId);
                 console.error('Erreur chargement:', error);
-                showLoading(false);
                 loadFallbackData();
                 updateUI();
                 showAlert('Erreur lors du chargement des données - Mode dégradé activé', 'danger');
@@ -1585,15 +1572,7 @@
         }
 
         // Loading spinner
-        function showLoading(show, message = 'Chargement...') {
-            const spinner = document.getElementById('loadingSpinner');
-            const status = document.getElementById('loadingStatus');
-            if (spinner) {
-                spinner.style.display = show ? 'flex' : 'none';
-                if (status && message) status.textContent = message;
-            }
-        }
-
+       
         // Alertes
         function showAlert(message, type = 'info') {
             const alertDiv = document.createElement('div');
