@@ -1113,12 +1113,11 @@
 
         // Initialisation
         async function initApp() {
-            showLoading(true, 'Chargement des données ROME...');
+          
             
             // Timeout de sécurité
             const timeoutId = setTimeout(() => {
                 console.warn('Timeout de chargement dépassé, utilisation des données de secours');
-                showLoading(false);
                 loadFallbackData();
                 updateUI();
                 showAlert('Chargement des données en mode dégradé', 'warning');
