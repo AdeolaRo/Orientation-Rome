@@ -1112,94 +1112,101 @@
 
         // Variables globales
         let romeData = {
-            metiers: [],                // Liste des appellations de métiers : { libelle, codeOGR, codeFiche, domaine }
-            fiches: new Set(),           // Codes de fiches ROME uniques
-            domaines: new Map(),         // Map codeDomaine -> { code, libelle, count }
-            centresInteret: []           // Liste des centres d'intérêt : { code, libelle, description, codesRome: [] }
+            metiers: [],
+            fiches: new Set(),
+            domaines: new Map(),
+            centresInteret: []
         };
-        let centreInteretMap = new Map(); // code centre -> objet centre
-        let metiersList = [];            // alias pour romeData.metiers
+        let centreInteretMap = new Map();
+
+        // Timeout pour éviter le chargement infini
+        const LOAD_TIMEOUT = 10000; // 10 secondes
 
         // Initialisation
         async function initApp() {
             showLoading(true, 'Chargement des données ROME...');
             
-            try {
-                // Charger les deux fichiers Excel
-                await loadRomeData();
-                
-                // Mettre à jour l'interface
-                updateUI();
-                
-                // Initialiser la navigation
-                setupNavigation();
-                
-                // Initialiser les événements
-                setupEvents();
-                
-                // Mettre à jour la date
-                document.getElementById('updateDate').textContent = new Date().toLocaleDateString('fr-FR');
-                
+            // Timeout de sécurité
+            const timeoutId = setTimeout(() => {
+                console.warn('Timeout de chargement dépassé, utilisation des données de secours');
                 showLoading(false);
-                
+                loadFallbackData();
+                updateUI();
+                showAlert('Chargement des données en mode dégradé', 'warning');
+            }, LOAD_TIMEOUT);
+            
+            try {
+                await loadRomeData();
+                clearTimeout(timeoutId);
+                updateUI();
+                setupNavigation();
+                setupEvents();
+                document.getElementById('updateDate').textContent = new Date().toLocaleDateString('fr-FR');
+                showLoading(false);
             } catch (error) {
+                clearTimeout(timeoutId);
                 console.error('Erreur chargement:', error);
                 showLoading(false);
-                showAlert('Erreur lors du chargement des données', 'danger');
+                loadFallbackData();
+                updateUI();
+                showAlert('Erreur lors du chargement des données - Mode dégradé activé', 'danger');
             }
         }
 
-        // Charger les données ROME à partir des deux fichiers Excel
+        // Charger les données ROME
         async function loadRomeData() {
-            return new Promise((resolve, reject) => {
-                // Chemins vers les fichiers Excel
-                const filePathPrincipale = 'data/ROME Arborescence principale - sept 2025.xlsx';
-                const filePathCentres = 'data/ROME Arborescence des centres d interet - sept 2025.xlsx';
+            // Chemins vers les fichiers (s'assurer qu'ils sont corrects)
+            const basePath = window.location.pathname.includes('/orientation/') ? '/orientation/' : './';
+            const filePathPrincipale = basePath + 'data/ROME Arborescence principale - sept 2025.xlsx';
+            const filePathCentres = basePath + 'data/ROME Arborescence des centres d interet - sept 2025.xlsx';
+            
+            console.log('Tentative de chargement:', filePathPrincipale, filePathCentres);
+            
+            try {
+                const [bufferPrincipale, bufferCentres] = await Promise.all([
+                    fetch(filePathPrincipale).then(res => {
+                        if (!res.ok) throw new Error(`Fichier principal non trouvé (${res.status})`);
+                        return res.arrayBuffer();
+                    }),
+                    fetch(filePathCentres).then(res => {
+                        if (!res.ok) throw new Error(`Fichier centres non trouvé (${res.status})`);
+                        return res.arrayBuffer();
+                    })
+                ]);
                 
-                Promise.all([
-                    fetch(filePathPrincipale).then(res => res.arrayBuffer()),
-                    fetch(filePathCentres).then(res => res.arrayBuffer())
-                ]).then(([bufferPrincipale, bufferCentres]) => {
-                    // Traiter le fichier principal
-                    const workbookPrincipal = XLSX.read(bufferPrincipale, { type: 'array' });
-                    const sheetNamePrincipal = 'Arbo Principale 18-09-2025';
-                    const sheetPrincipal = workbookPrincipal.Sheets[sheetNamePrincipal];
-                    if (!sheetPrincipal) {
-                        reject(new Error('Feuille Arbo Principale non trouvée'));
-                        return;
-                    }
-                    const rowsPrincipal = XLSX.utils.sheet_to_json(sheetPrincipal, { header: 1 });
-                    processPrincipalData(rowsPrincipal);
+                // Traiter le fichier principal
+                const workbookPrincipal = XLSX.read(bufferPrincipale, { type: 'array' });
+                const sheetNamePrincipal = 'Arbo Principale 18-09-2025';
+                const sheetPrincipal = workbookPrincipal.Sheets[sheetNamePrincipal];
+                if (!sheetPrincipal) throw new Error('Feuille Arbo Principale non trouvée');
+                
+                const rowsPrincipal = XLSX.utils.sheet_to_json(sheetPrincipal, { header: 1 });
+                processPrincipalData(rowsPrincipal);
 
-                    // Traiter le fichier des centres d'intérêt
-                    const workbookCentres = XLSX.read(bufferCentres, { type: 'array' });
-                    const sheetNameCentres = 'Centre d\'intérêt 09-2025';
-                    const sheetCentres = workbookCentres.Sheets[sheetNameCentres];
-                    if (!sheetCentres) {
-                        reject(new Error('Feuille Centre d\'intérêt non trouvée'));
-                        return;
-                    }
-                    const rowsCentres = XLSX.utils.sheet_to_json(sheetCentres, { header: 1 });
-                    processCentresData(rowsCentres);
+                // Traiter le fichier des centres d'intérêt
+                const workbookCentres = XLSX.read(bufferCentres, { type: 'array' });
+                const sheetNameCentres = 'Centre d\'intérêt 09-2025';
+                const sheetCentres = workbookCentres.Sheets[sheetNameCentres];
+                if (!sheetCentres) throw new Error('Feuille Centre d\'intérêt non trouvée');
+                
+                const rowsCentres = XLSX.utils.sheet_to_json(sheetCentres, { header: 1 });
+                processCentresData(rowsCentres);
 
-                    resolve();
-                }).catch(error => {
-                    console.error('Erreur chargement:', error);
-                    // Fallback avec données de secours
-                    loadFallbackData();
-                    resolve();
-                });
-            });
+                console.log('Données chargées avec succès');
+            } catch (error) {
+                console.error('Erreur détaillée:', error);
+                throw error;
+            }
         }
 
         // Traiter les données de l'arborescence principale
         function processPrincipalData(rows) {
             let currentDomaine = '';
             let currentFiche = '';
-            let seenCodes = new Set(); // pour éviter les doublons d'appellations
+            let seenCodes = new Set();
 
             rows.forEach((row, index) => {
-                if (index < 4) return; // Ignorer les en-têtes
+                if (index < 4) return;
 
                 const codeDomaine = row[0] || '';
                 const codeSous = row[1] || '';
@@ -1207,7 +1214,6 @@
                 const libelle = row[3] || '';
                 const codeOGR = row[4] ? String(row[4]).trim() : '';
 
-                // Nouveau domaine (ligne avec codeDomaine non vide, codeSous et codeFiche vides)
                 if (codeDomaine && !codeSous && !codeFiche && libelle) {
                     currentDomaine = codeDomaine;
                     if (!romeData.domaines.has(codeDomaine)) {
@@ -1219,9 +1225,7 @@
                     }
                 }
 
-                // Ligne avec codeOGR (appellation de métier)
                 if (codeOGR && libelle) {
-                    // Éviter les doublons de libellé (certains peuvent apparaître plusieurs fois)
                     const key = `${libelle}|${codeOGR}`;
                     if (!seenCodes.has(key)) {
                         seenCodes.add(key);
@@ -1231,64 +1235,41 @@
                             codeFiche: codeFiche,
                             domaine: codeDomaine
                         });
-                        // Compter les fiches uniques
-                        if (codeFiche) {
-                            romeData.fiches.add(codeFiche);
-                        }
-                        // Incrémenter le compteur du domaine
+                        if (codeFiche) romeData.fiches.add(codeFiche);
                         if (codeDomaine && romeData.domaines.has(codeDomaine)) {
                             romeData.domaines.get(codeDomaine).count++;
                         }
                     }
                 }
             });
-
-            console.log('Données principales chargées:', {
-                metiers: romeData.metiers.length,
-                fiches: romeData.fiches.size,
-                domaines: romeData.domaines.size
-            });
         }
 
         // Traiter les données des centres d'intérêt
         function processCentresData(rows) {
             let currentCentre = null;
-            let currentLibelle = '';
-            let currentDescription = '';
 
             rows.forEach((row, index) => {
-                if (index < 1) return; // Ignorer les en-têtes ? La première ligne est probablement des en-têtes.
+                if (index < 1) return;
 
                 const colA = row[0] || '';
                 const colB = row[1] || '';
                 const colC = row[2] || '';
 
-                // Si la colonne B contient un libellé long (commence par "J'ai envie de..." etc.), c'est un nouveau centre d'intérêt
                 if (colB && !colA && colB.includes('J\'')) {
-                    if (currentCentre) {
-                        romeData.centresInteret.push(currentCentre);
-                    }
+                    if (currentCentre) romeData.centresInteret.push(currentCentre);
                     currentCentre = {
                         libelle: colB,
                         description: colC || '',
                         codesRome: []
                     };
                 } else if (colA && colA.trim() !== '' && currentCentre) {
-                    // La colonne A contient un code ROME associé à ce centre
-                    const code = colA.trim();
-                    // Le code peut être un code fiche (ex: "A1206") ou un code OGR ? Dans le fichier, ce sont des codes de fiche ROME (ex: A1206, etc.)
-                    currentCentre.codesRome.push(code);
+                    currentCentre.codesRome.push(colA.trim());
                 }
             });
-            // Ajouter le dernier centre
-            if (currentCentre) {
-                romeData.centresInteret.push(currentCentre);
-            }
-
-            console.log('Centres d\'intérêt chargés:', romeData.centresInteret.length);
+            if (currentCentre) romeData.centresInteret.push(currentCentre);
         }
 
-        // Données de secours en cas d'échec de chargement
+        // Données de secours
         function loadFallbackData() {
             romeData.metiers = [
                 { libelle: 'Développeur informatique', codeOGR: 'M1805', codeFiche: 'M1805', domaine: 'M' },
@@ -1310,7 +1291,6 @@
 
         // Mettre à jour l'interface
         function updateUI() {
-            // Statistiques
             document.getElementById('metiersCount').textContent = romeData.metiers.length + ' métiers';
             document.getElementById('domainesCount').textContent = romeData.domaines.size + ' domaines';
             document.getElementById('fichesCount').textContent = romeData.fiches.size + ' fiches';
@@ -1319,10 +1299,8 @@
             document.getElementById('statFiches').textContent = romeData.fiches.size;
             document.getElementById('statDomaines').textContent = romeData.domaines.size;
             document.getElementById('statCentres').textContent = romeData.centresInteret.length;
-            
             document.getElementById('statsMetiers').textContent = romeData.metiers.length;
             
-            // Liste des domaines
             const domainesList = document.getElementById('domainesList');
             if (domainesList) {
                 domainesList.innerHTML = '';
@@ -1336,7 +1314,6 @@
                 });
             }
             
-            // Filtre domaines
             const domaineFilter = document.getElementById('domaineFilter');
             if (domaineFilter) {
                 domaineFilter.innerHTML = '<option value="">Tous les domaines</option>';
@@ -1345,7 +1322,6 @@
                 });
             }
             
-            // Centres d'intérêt
             const centreSelect = document.getElementById('centreInteret');
             if (centreSelect) {
                 centreSelect.innerHTML = '';
@@ -1357,18 +1333,13 @@
                 });
             }
             
-            // Select métiers formation
             const metierFormation = document.getElementById('metierFormation');
             if (metierFormation) {
                 metierFormation.innerHTML = '<option value="">Choisissez un métier</option>';
-                
-                // Ajouter les métiers par domaine
                 const domaines = Array.from(romeData.domaines.keys()).sort();
                 domaines.forEach(dom => {
                     const optgroup = document.createElement('optgroup');
                     optgroup.label = `Domaine ${dom}`;
-                    
-                    // Ajouter quelques métiers du domaine (max 5)
                     const metiersDom = romeData.metiers
                         .filter(m => m.domaine === dom)
                         .slice(0, 5);
@@ -1378,12 +1349,10 @@
                         option.textContent = metier.libelle;
                         optgroup.appendChild(option);
                     });
-                    
                     metierFormation.appendChild(optgroup);
                 });
             }
             
-            // Top domaines
             const topDomainesList = document.getElementById('topDomainesList');
             if (topDomainesList) {
                 topDomainesList.innerHTML = '';
@@ -1400,7 +1369,6 @@
                 });
             }
             
-            // Initialiser les graphiques
             initCharts();
         }
 
@@ -1412,19 +1380,15 @@
             navLinks.forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
-                    
                     navLinks.forEach(l => l.classList.remove('active'));
                     this.classList.add('active');
-                    
                     const targetId = this.getAttribute('data-section');
                     sections.forEach(section => section.classList.remove('active'));
                     document.getElementById(targetId).classList.add('active');
-                    
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 });
             });
             
-            // Boutons d'accueil
             document.querySelector('.orientation-btn')?.addEventListener('click', function() {
                 navLinks.forEach(l => l.classList.remove('active'));
                 document.querySelector('[data-section="orientation"]').classList.add('active');
@@ -1442,7 +1406,6 @@
 
         // Configuration événements
         function setupEvents() {
-            // Recherche métiers
             document.getElementById('profileForm')?.addEventListener('submit', function(e) {
                 e.preventDefault();
                 searchMetiers();
@@ -1453,21 +1416,17 @@
                 document.getElementById('searchResults').classList.add('d-none');
             });
             
-            // Sélection métier formation
             document.getElementById('metierFormation')?.addEventListener('change', function() {
                 const selected = this.value;
-                // Chercher un code ROME correspondant
                 const metier = romeData.metiers.find(m => m.libelle === selected);
                 document.getElementById('codeRomeFormation').value = metier ? metier.codeOGR : '';
             });
             
-            // Formation form
             document.getElementById('formationForm')?.addEventListener('submit', function(e) {
                 e.preventDefault();
                 simulateFormation();
             });
             
-            // Contact conseiller
             document.getElementById('contactConseiller')?.addEventListener('click', function() {
                 window.open('tel:3949');
             });
@@ -1482,40 +1441,21 @@
             
             let results = [...romeData.metiers];
             
-            // Filtre recherche par mot-clé
-            if (searchTerm) {
-                results = results.filter(m => 
-                    m.libelle.toLowerCase().includes(searchTerm)
-                );
-            }
+            if (searchTerm) results = results.filter(m => m.libelle.toLowerCase().includes(searchTerm));
+            if (codeRome) results = results.filter(m => m.codeOGR && m.codeOGR.toString().includes(codeRome));
+            if (domaine) results = results.filter(m => m.domaine === domaine);
             
-            // Filtre code ROME
-            if (codeRome) {
-                results = results.filter(m => 
-                    m.codeOGR && m.codeOGR.toString().includes(codeRome)
-                );
-            }
-            
-            // Filtre domaine
-            if (domaine) {
-                results = results.filter(m => m.domaine === domaine);
-            }
-            
-            // Filtre centres d'intérêt : on récupère tous les codes ROME associés aux centres sélectionnés
             if (centresSelection.length > 0) {
                 const codesFromCentres = new Set();
                 centresSelection.forEach(centreLib => {
                     const centre = romeData.centresInteret.find(c => c.libelle === centreLib);
-                    if (centre && centre.codesRome) {
-                        centre.codesRome.forEach(code => codesFromCentres.add(code));
-                    }
+                    if (centre && centre.codesRome) centre.codesRome.forEach(code => codesFromCentres.add(code));
                 });
                 if (codesFromCentres.size > 0) {
                     results = results.filter(m => codesFromCentres.has(m.codeFiche) || codesFromCentres.has(m.codeOGR));
                 }
             }
             
-            // Afficher résultats
             displayResults(results.slice(0, 20));
         }
 
@@ -1586,7 +1526,6 @@
             const niveau = document.getElementById('niveauFormation').value;
             const cpf = document.getElementById('cpf').checked;
             
-            // Durées simulées selon le niveau
             let duree = '12-24 mois';
             let niveauObtenu = 'Bac+2';
             let financements = ['CPF'];
@@ -1605,13 +1544,8 @@
                 financements = ['CPF', 'AIF', 'Pro-A', 'Contrat pro'];
             }
             
-            if (situation === 'demandeur') {
-                financements.push('Aide spécifique France Travail');
-            }
-            
-            if (!cpf) {
-                financements = financements.filter(f => f !== 'CPF');
-            }
+            if (situation === 'demandeur') financements.push('Aide spécifique France Travail');
+            if (!cpf) financements = financements.filter(f => f !== 'CPF');
             
             document.getElementById('dureeFormation').textContent = duree;
             document.getElementById('niveauObtenu').textContent = niveauObtenu;
@@ -1626,11 +1560,7 @@
             const sectorCtx = document.getElementById('sectorChart');
             if (!sectorCtx) return;
             
-            const domainesData = {
-                labels: [],
-                data: []
-            };
-            
+            const domainesData = { labels: [], data: [] };
             romeData.domaines.forEach((domaine, code) => {
                 domainesData.labels.push(`Domaine ${code}`);
                 domainesData.data.push(domaine.count);
@@ -1648,14 +1578,8 @@
                 },
                 options: {
                     responsive: true,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
                 }
             });
         }
@@ -1664,12 +1588,9 @@
         function showLoading(show, message = 'Chargement...') {
             const spinner = document.getElementById('loadingSpinner');
             const status = document.getElementById('loadingStatus');
-            
             if (spinner) {
                 spinner.style.display = show ? 'flex' : 'none';
-                if (status && message) {
-                    status.textContent = message;
-                }
+                if (status && message) status.textContent = message;
             }
         }
 
@@ -1683,12 +1604,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             `;
             document.body.appendChild(alertDiv);
-            
-            setTimeout(() => {
-                if (alertDiv.parentNode) {
-                    alertDiv.remove();
-                }
-            }, 5000);
+            setTimeout(() => alertDiv.remove(), 5000);
         }
     </script>
 </body>
