@@ -3,16 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solutions - Orientation</title>
-    
+    <title>ROME Pro - Orientation officielle</title>
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <!-- SheetJS pour lire les fichiers Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
+    <!-- Style CSS personnalisé -->
     <style>
-        /* ===== CSS PERSONNALISÉ POUR ROME PRO - VERSION AMÉLIORÉE ===== */
+        /* ===== CSS PERSONNALISÉ POUR ROME PRO - VERSION FINALE ===== */
         :root {
             --primary: #0055a4;
             --primary-dark: #003f7f;
@@ -86,22 +84,27 @@
             margin-left: -15px;
         }
 
-        .col-md-3, .col-md-4, .col-md-6, .col-lg-4, .col-lg-6, .col-lg-8, .col-lg-10 {
+        [class*="col-"] {
             position: relative;
             width: 100%;
             padding-right: 15px;
             padding-left: 15px;
         }
+
+        .col { flex: 1 0 0%; }
         @media (min-width: 768px) {
             .col-md-3 { flex: 0 0 25%; max-width: 25%; }
-            .col-md-4 { flex: 0 0 33.333%; max-width: 33.333%; }
+            .col-md-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
             .col-md-6 { flex: 0 0 50%; max-width: 50%; }
+            .col-md-8 { flex: 0 0 66.666667%; max-width: 66.666667%; }
+            .col-md-9 { flex: 0 0 75%; max-width: 75%; }
+            .col-md-12 { flex: 0 0 100%; max-width: 100%; }
         }
         @media (min-width: 992px) {
-            .col-lg-4 { flex: 0 0 33.333%; max-width: 33.333%; }
+            .col-lg-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
             .col-lg-6 { flex: 0 0 50%; max-width: 50%; }
-            .col-lg-8 { flex: 0 0 66.666%; max-width: 66.666%; }
-            .col-lg-10 { flex: 0 0 83.333%; max-width: 83.333%; }
+            .col-lg-8 { flex: 0 0 66.666667%; max-width: 66.666667%; }
+            .col-lg-10 { flex: 0 0 83.333333%; max-width: 83.333333%; }
         }
 
         /* ===== UTILITAIRES ===== */
@@ -114,16 +117,22 @@
         .align-items-center { align-items: center !important; }
         .text-center { text-align: center !important; }
         .text-left { text-align: left !important; }
+        .text-right { text-align: right !important; }
         .text-muted { color: var(--gray) !important; }
         .text-primary { color: var(--primary) !important; }
         .text-success { color: var(--success) !important; }
         .text-warning { color: var(--warning) !important; }
+        .text-white { color: #fff !important; }
+
         .bg-light { background-color: var(--light) !important; }
         .bg-gradient-primary { background: var(--gradient-primary) !important; color: white; }
+        .bg-gradient-secondary { background: var(--gradient-secondary) !important; color: white; }
         .bg-success { background-color: var(--success) !important; color: white; }
         .bg-warning { background-color: var(--warning) !important; color: #212529; }
+
         .border-0 { border: 0 !important; }
         .border-primary { border-color: var(--primary) !important; }
+        .border-success { border-color: var(--success) !important; }
         .shadow-lg { box-shadow: var(--box-shadow) !important; }
 
         .mt-3 { margin-top: 1rem !important; }
@@ -143,6 +152,7 @@
         .px-5 { padding-left: 3rem !important; padding-right: 3rem !important; }
         .gap-3 { gap: 1rem !important; }
         .w-100 { width: 100% !important; }
+        .h-100 { height: 100% !important; }
 
         /* ===== NAVBAR ===== */
         .navbar {
@@ -194,7 +204,6 @@
             color: white;
             background: rgba(255,255,255,0.15);
         }
-
         @media (max-width: 767px) {
             .navbar-toggler { display: block; }
             .navbar-collapse {
@@ -230,7 +239,8 @@
         }
         .btn:hover { transform: translateY(-2px); box-shadow: var(--box-shadow-sm); }
         .btn-lg { padding: 0.75rem 1.5rem; font-size: 1.25rem; border-radius: var(--border-radius-lg); }
-        .btn-primary { background: var(--gradient-primary); color: white; }
+        .btn-sm { padding: 0.25rem 0.75rem; font-size: 0.875rem; }
+        .btn-primary { background: var(--gradient-primary); color: white; border: none; }
         .btn-primary:hover { background: var(--primary-dark); color: white; }
         .btn-outline-light {
             background: transparent;
@@ -327,6 +337,13 @@
             background-color: #d4edda;
             border-color: #c3e6cb;
         }
+        .alert-dismissible { padding-right: 3rem; }
+        .alert-dismissible .btn-close {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 1.25rem 1rem;
+        }
 
         /* ===== FORMULAIRES ===== */
         .form-group { margin-bottom: 1rem; }
@@ -405,6 +422,13 @@
             background-color: var(--light);
             transform: translateX(5px);
         }
+        .list-group-flush .list-group-item {
+            border-right: 0;
+            border-left: 0;
+            border-radius: 0;
+        }
+        .list-group-flush .list-group-item:first-child { border-top: 0; }
+        .list-group-flush .list-group-item:last-child { border-bottom: 0; }
         .list-unstyled { padding-left: 0; list-style: none; }
 
         /* ===== MODALE ===== */
@@ -457,9 +481,10 @@
             list-style: none;
             border-bottom: 2px solid var(--gray-light);
             margin-bottom: 1.5rem;
+            padding-left: 0;
         }
-        .nav-item { margin-bottom: -2px; }
-        .nav-link {
+        .nav-tabs .nav-item { margin-bottom: -2px; }
+        .nav-tabs .nav-link {
             display: block;
             padding: 0.75rem 1.25rem;
             border: 1px solid transparent;
@@ -470,13 +495,14 @@
             cursor: pointer;
             font-weight: 500;
         }
-        .nav-link:hover { color: var(--primary); }
-        .nav-link.active {
+        .nav-tabs .nav-link:hover { color: var(--primary); }
+        .nav-tabs .nav-link.active {
             color: var(--primary);
             background-color: white;
             border-color: var(--gray-light) var(--gray-light) white;
             font-weight: 700;
         }
+        .tab-content { padding: 1rem 0; }
         .tab-pane { display: none; }
         .tab-pane.active { display: block; animation: fadeIn 0.5s; }
 
@@ -582,6 +608,12 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+        /* ===== POSITIONNEMENT ===== */
+        .position-fixed { position: fixed !important; }
+        .top-0 { top: 0 !important; }
+        .start-50 { left: 50% !important; }
+        .translate-middle-x { transform: translateX(-50%) !important; }
+
         @media (max-width: 768px) {
             body { padding-top: 60px; }
             .hero-section { padding: 3rem 1rem; }
@@ -629,7 +661,7 @@
                 <div class="card-body p-5">
                     <h3 class="text-center mb-4">Classification officielle des métiers</h3>
                     <div class="row">
-                        <div class="col-md-6"><ul class="list-unstyled" id="domainesList"><li class="loader-container"><div class="loader"></div></li></ul></div>
+                        <div class="col-md-6"><ul class="list-unstyled" id="domainesList"></ul></div>
                         <div class="col-md-6"><div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>Données mises à jour : Référentiel ROME v4.6.0 - Septembre 2025</div></div>
                     </div>
                 </div>
@@ -746,29 +778,80 @@
                         <li class="nav-item"><button class="nav-link" onclick="switchTab('formationAide')">📚 Formation</button></li>
                         <li class="nav-item"><button class="nav-link" onclick="switchTab('juridique')">⚖️ Juridique</button></li>
                     </ul>
-                    <div class="tab-content">
-                        <!-- Les onglets reprennent les mêmes liens que précédemment, je les abrège ici pour la lisibilité mais ils sont identiques -->
-                        <div class="tab-pane active" id="logement-content"><div class="row">
-                            <div class="col-md-4 mb-3"><a href="https://www.actionlogement.fr" target="_blank" class="solution-link"><i class="fas fa-home text-primary me-2"></i>Action Logement <small class="d-block text-muted">Aides à la mobilité</small></a></div>
-                            <div class="col-md-4 mb-3"><a href="https://www.service-public.fr/particuliers/vosdroits/F12006" target="_blank" class="solution-link"><i class="fas fa-euro-sign text-success me-2"></i>APL <small class="d-block text-muted">Aide personnalisée</small></a></div>
-                            <div class="col-md-4 mb-3"><a href="https://www.actionlogement.fr/visale" target="_blank" class="solution-link"><i class="fas fa-shield-alt text-info me-2"></i>Garantie Visale <small class="d-block text-muted">Garantie locative</small></a></div>
-                            <div class="col-md-4 mb-3"><a href="https://www.service-public.fr/particuliers/vosdroits/F1625" target="_blank" class="solution-link"><i class="fas fa-hand-holding-heart text-warning me-2"></i>FSL <small class="d-block text-muted">Fonds Solidarité</small></a></div>
-                            <div class="col-md-4 mb-3"><a href="https://www.anil.org" target="_blank" class="solution-link"><i class="fas fa-info-circle text-secondary me-2"></i>ANIL <small class="d-block text-muted">Agence nationale info logement</small></a></div>
-                            <div class="col-md-4 mb-3"><a href="https://www.francetravail.fr/candidat/vos-droits-et-aides/aides-financieres/l-aide-a-la-mobilite.html" target="_blank" class="solution-link"><i class="fas fa-car text-danger me-2"></i>Aide mobilité <small class="d-block text-muted">Pour demandeurs d'emploi</small></a></div>
-                        </div></div>
-                        <!-- Pour les autres onglets, on mettra un contenu minimal -->
-                        <div class="tab-pane" id="enfant-content"><div class="row">...</div></div>
-                        <div class="tab-pane" id="sante-content"><div class="row">...</div></div>
-                        <div class="tab-pane" id="transport-content"><div class="row">...</div></div>
-                        <div class="tab-pane" id="formationAide-content"><div class="row">...</div></div>
-                        <div class="tab-pane" id="juridique-content"><div class="row">...</div></div>
+                    <div class="tab-content" id="aidesTabContent">
+                        <!-- Logement -->
+                        <div class="tab-pane active" id="logement-content">
+                            <div class="row">
+                                <div class="col-md-4 mb-3"><a href="https://www.actionlogement.fr" target="_blank" class="solution-link"><i class="fas fa-home text-primary me-2"></i>Action Logement<small class="d-block text-muted">Aides à la mobilité et au logement</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.service-public.fr/particuliers/vosdroits/F12006" target="_blank" class="solution-link"><i class="fas fa-euro-sign text-success me-2"></i>APL<small class="d-block text-muted">Aide personnalisée au logement</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.actionlogement.fr/visale" target="_blank" class="solution-link"><i class="fas fa-shield-alt text-info me-2"></i>Garantie Visale<small class="d-block text-muted">Garantie locative gratuite</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.service-public.fr/particuliers/vosdroits/F1625" target="_blank" class="solution-link"><i class="fas fa-hand-holding-heart text-warning me-2"></i>FSL<small class="d-block text-muted">Fonds Solidarité Logement</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.anil.org" target="_blank" class="solution-link"><i class="fas fa-info-circle text-secondary me-2"></i>ANIL<small class="d-block text-muted">Agence nationale info logement</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.francetravail.fr/candidat/vos-droits-et-aides/aides-financieres/l-aide-a-la-mobilite.html" target="_blank" class="solution-link"><i class="fas fa-car text-danger me-2"></i>Aide mobilité<small class="d-block text-muted">Pour demandeurs d'emploi</small></a></div>
+                            </div>
+                        </div>
+                        <!-- Garde d'enfant -->
+                        <div class="tab-pane" id="enfant-content">
+                            <div class="row">
+                                <div class="col-md-4 mb-3"><a href="https://www.caf.fr/allocataires/aides-et-demarches/droits-et-prestations/vie-personnelle/le-complement-de-libre-choix-du-mode-de-garde-cmg" target="_blank" class="solution-link"><i class="fas fa-baby text-primary me-2"></i>CMG - CAF<small class="d-block text-muted">Complément mode de garde</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.francetravail.fr/candidat/vos-droits-et-aides/aides-financieres/les-aides-financieres-en-faveur/l-aide-a-la-garde-d-enfant-pour.html" target="_blank" class="solution-link"><i class="fas fa-baby-carriage text-success me-2"></i>Aide garde enfant<small class="d-block text-muted">Pour formations et entretiens</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.cesu.urssaf.fr" target="_blank" class="solution-link"><i class="fas fa-credit-card text-info me-2"></i>CESU<small class="d-block text-muted">Chèque emploi service universel</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.mon-enfant.fr" target="_blank" class="solution-link"><i class="fas fa-search text-warning me-2"></i>Mon-enfant.fr<small class="d-block text-muted">Recherche de modes de garde</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.pajemploi.urssaf.fr" target="_blank" class="solution-link"><i class="fas fa-file-invoice text-secondary me-2"></i>Pajemploi<small class="d-block text-muted">Déclaration des salaires</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.service-public.fr/particuliers/vosdroits/F1450" target="_blank" class="solution-link"><i class="fas fa-scale-balanced text-danger me-2"></i>Réduction d'impôt<small class="d-block text-muted">Pour frais de garde d'enfants</small></a></div>
+                            </div>
+                        </div>
+                        <!-- Santé -->
+                        <div class="tab-pane" id="sante-content">
+                            <div class="row">
+                                <div class="col-md-4 mb-3"><a href="https://www.ameli.fr" target="_blank" class="solution-link"><i class="fas fa-heartbeat text-primary me-2"></i>ameli.fr<small class="d-block text-muted">Assurance Maladie</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.complementaire-sante-solidaire.gouv.fr" target="_blank" class="solution-link"><i class="fas fa-plus-circle text-success me-2"></i>Complémentaire santé solidaire<small class="d-block text-muted">CMU-C / ACS</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.service-public.fr/particuliers/vosdroits/F10007" target="_blank" class="solution-link"><i class="fas fa-stethoscope text-info me-2"></i>PASS<small class="d-block text-muted">Permanence accès soins santé</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.sante.fr" target="_blank" class="solution-link"><i class="fas fa-map-marked-alt text-warning me-2"></i>Santé.fr<small class="d-block text-muted">Annuaire des professionnels</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.francetravail.fr/candidat/vos-droits-et-aides/nous-vous-accompagnons/sante-travail.html" target="_blank" class="solution-link"><i class="fas fa-briefcase text-secondary me-2"></i>Santé travail<small class="d-block text-muted">Accompagnement spécifique</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.mutualite.fr" target="_blank" class="solution-link"><i class="fas fa-hand-holding-heart text-danger me-2"></i>Mutualité Française<small class="d-block text-muted">Infos sur les mutuelles</small></a></div>
+                            </div>
+                        </div>
+                        <!-- Transport -->
+                        <div class="tab-pane" id="transport-content">
+                            <div class="row">
+                                <div class="col-md-4 mb-3"><a href="https://www.francetravail.fr/candidat/vos-droits-et-aides/aides-financieres/les-aides-financieres-en-faveur/l-aide-au-permis-de-conduire.html" target="_blank" class="solution-link"><i class="fas fa-id-card text-primary me-2"></i>Permis à 1€ par jour<small class="d-block text-muted">Aide au financement du permis</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.francetravail.fr/candidat/vos-droits-et-aides/aides-financieres/l-aide-a-la-mobilite.html" target="_blank" class="solution-link"><i class="fas fa-car text-success me-2"></i>Aide à la mobilité<small class="d-block text-muted">Pour l'achat/réparation véhicule</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.service-public.fr/particuliers/vosdroits/F1430" target="_blank" class="solution-link"><i class="fas fa-bicycle text-info me-2"></i>Forfait mobilités durables<small class="d-block text-muted">Indemnité vélo/covoiturage</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.iledefrance-mobilites.fr" target="_blank" class="solution-link"><i class="fas fa-train text-warning me-2"></i>Île-de-France Mobilités<small class="d-block text-muted">Aides transport IDF</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.francetravail.fr/candidat/vos-droits-et-aides/aides-financieres/les-aides-financieres-en-faveur/l-aide-a-la-mobilite-internationale.html" target="_blank" class="solution-link"><i class="fas fa-globe text-secondary me-2"></i>Mobilité internationale<small class="d-block text-muted">Aide pour projet à l'étranger</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.ecologie.gouv.fr/prime-conversion" target="_blank" class="solution-link"><i class="fas fa-leaf text-danger me-2"></i>Prime à la conversion<small class="d-block text-muted">Pour véhicules propres</small></a></div>
+                            </div>
+                        </div>
+                        <!-- Formation -->
+                        <div class="tab-pane" id="formationAide-content">
+                            <div class="row">
+                                <div class="col-md-4 mb-3"><a href="https://www.moncompteformation.gouv.fr" target="_blank" class="solution-link"><i class="fas fa-credit-card text-primary me-2"></i>Mon Compte Formation<small class="d-block text-muted">Gestion du CPF</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.francetravail.fr/candidat/en-formation/les-aides-financieres-de-pole-emploi/l-aide-individuelle-a-la-formation.html" target="_blank" class="solution-link"><i class="fas fa-gift text-success me-2"></i>AIF<small class="d-block text-muted">Aide individuelle à la formation</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.francetravail.fr/candidat/en-formation/les-aides-financieres-de-pole-emploi/la-preparation-operationnelle-a-l.html" target="_blank" class="solution-link"><i class="fas fa-briefcase text-info me-2"></i>POEC/POEI<small class="d-block text-muted">Préparation opérationnelle</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.francecompetences.fr" target="_blank" class="solution-link"><i class="fas fa-certificate text-warning me-2"></i>France Compétences<small class="d-block text-muted">Référentiel certifications</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://travail-emploi.gouv.fr/formation-professionnelle" target="_blank" class="solution-link"><i class="fas fa-gavel text-secondary me-2"></i>Ministère du Travail<small class="d-block text-muted">Politique de formation</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.choisirmonmetier-paysdelaloire.fr" target="_blank" class="solution-link"><i class="fas fa-map text-danger me-2"></i>Plateformes régionales<small class="d-block text-muted">Aides selon votre région</small></a></div>
+                            </div>
+                        </div>
+                        <!-- Juridique -->
+                        <div class="tab-pane" id="juridique-content">
+                            <div class="row">
+                                <div class="col-md-4 mb-3"><a href="https://www.justice.fr" target="_blank" class="solution-link"><i class="fas fa-gavel text-primary me-2"></i>justice.fr<small class="d-block text-muted">Portail du ministère</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.defenseurdesdroits.fr" target="_blank" class="solution-link"><i class="fas fa-shield text-success me-2"></i>Défenseur des droits<small class="d-block text-muted">Aide et médiation</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.service-public.fr/particuliers/vosdroits/F1807" target="_blank" class="solution-link"><i class="fas fa-file-signature text-info me-2"></i>Aide juridictionnelle<small class="d-block text-muted">Prise en charge frais</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.cnaj.avocat.fr" target="_blank" class="solution-link"><i class="fas fa-balance-scale text-warning me-2"></i>Consultation avocat<small class="d-block text-muted">Conseils juridiques</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://banque-france.fr" target="_blank" class="solution-link"><i class="fas fa-coins text-secondary me-2"></i>Banque de France<small class="d-block text-muted">Surendettement</small></a></div>
+                                <div class="col-md-4 mb-3"><a href="https://www.francetravail.fr/candidat/vos-droits-et-aides/aides-financieres/les-aides-financieres-en-faveur/l-aide-a-la-reprise-ou-a-la-creation.html" target="_blank" class="solution-link"><i class="fas fa-store text-danger me-2"></i>Aide création entreprise<small class="d-block text-muted">Accompagnement juridique</small></a></div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="alert alert-warning mt-4"><i class="fas fa-exclamation-triangle me-2"></i>Contactez France Travail au 39 49 pour vos droits précis.</div>
+                    <div class="alert alert-warning mt-4"><i class="fas fa-exclamation-triangle me-2"></i><strong>Pour connaître vos droits précis :</strong> Contactez France Travail au 39 49 ou consultez votre conseiller.</div>
                 </div>
             </div>
         </section>
 
-        <!-- STATISTICS SECTION (sans graphiques) -->
+        <!-- STATISTICS SECTION -->
         <section id="stats" class="section">
             <div class="card shadow-lg">
                 <div class="card-header bg-gradient-primary"><i class="fas fa-chart-bar me-2"></i>Statistiques ROME 4.0</div>
@@ -783,374 +866,415 @@
                         <div class="col-lg-8"><div class="card"><div class="card-header bg-primary text-white"><h5>Liste des domaines</h5></div><div class="card-body"><ul class="list-group" id="domainesStatList"></ul></div></div></div>
                         <div class="col-lg-4"><div class="card h-100"><div class="card-header bg-success text-white"><h5>Top domaines</h5></div><div class="card-body"><ul class="list-group list-group-flush" id="topDomainesList"></ul></div></div></div>
                     </div>
-                    <div class="alert alert-info mt-4"><i class="fas fa-database me-2"></i>Source : Référentiel opérationnel des métiers et emplois (ROME) - Version 4.6.0 (septembre 2025)</div>
+                    <div class="alert alert-info mt-4"><i class="fas fa-database me-2"></i><strong>Source :</strong> Référentiel opérationnel des métiers et emplois (ROME) - Version 4.6.0 (septembre 2025)</div>
                 </div>
             </div>
         </section>
     </div>
 
-    <footer class="footer"><div class="container"><div class="row">
-        <div class="col-md-4"><h5>Orientation Pro</h5><p>Application basée sur les données officielles ROME 4.0.</p></div>
-        <div class="col-md-4"><h5>Liens officiels</h5><ul><li><a href="https://www.francetravail.fr" target="_blank">France Travail</a></li><li><a href="https://travail-emploi.gouv.fr" target="_blank">Ministère du Travail</a></li><li><a href="https://www.service-public.fr" target="_blank">Service-Public.fr</a></li></ul></div>
-        <div class="col-md-4"><h5>Contact</h5><p>France Travail : 39 49</p><p class="small">Données mises à jour : <span id="updateDate"></span></p></div>
-    </div><div class="text-center mt-3"><small>© 2024 - Application non officielle basée sur les données publiques France Travail</small></div></div></footer>
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4"><h5>Orientation Pro</h5><p>Application basée sur les données officielles ROME 4.0.</p></div>
+                <div class="col-md-4"><h5>Liens officiels</h5><ul><li><a href="https://www.francetravail.fr" target="_blank">France Travail</a></li><li><a href="https://travail-emploi.gouv.fr" target="_blank">Ministère du Travail</a></li><li><a href="https://www.service-public.fr" target="_blank">Service-Public.fr</a></li></ul></div>
+                <div class="col-md-4"><h5>Contact</h5><p>France Travail : 39 49</p><p class="small">Données mises à jour : <span id="updateDate"></span></p></div>
+            </div>
+            <div class="text-center mt-3"><small>© 2024 - Application non officielle basée sur les données publiques France Travail</small></div>
+        </div>
+    </footer>
 
     <script>
-        // ==================== JAVASCRIPT ====================
-        document.addEventListener('DOMContentLoaded', initApp);
-
-        // Variables globales
-        let romeData = {
-            metiers: [],
-            fiches: new Set(),
-            domaines: new Map(),
-            centresInteret: []
-        };
-        let romeToFormation = new Map(); // code ROME -> liste de codes formation
-
-        const LOAD_TIMEOUT = 8000; // 8 secondes
-
-        async function initApp() {
-            const timeoutId = setTimeout(() => {
-                console.warn('Timeout chargement, données de secours');
-                loadFallbackData();
-                updateUI();
-                showAlert('Chargement en mode dégradé', 'warning');
-            }, LOAD_TIMEOUT);
-
-            try {
-                await loadAllData();
-                clearTimeout(timeoutId);
-                updateUI();
-                setupNavigation();
-                setupEvents();
-                document.getElementById('updateDate').textContent = new Date().toLocaleDateString('fr-FR');
-            } catch (err) {
-                clearTimeout(timeoutId);
-                console.error('Erreur chargement', err);
-                loadFallbackData();
-                updateUI();
-                showAlert('Erreur de chargement - mode dégradé', 'danger');
-            }
-        }
-
-        async function loadAllData() {
-            const basePath = 'data/';
-            // Les fichiers attendus
-            const files = {
-                principal: basePath + 'FCod.xls',
-                romecod: basePath + 'RomeFCod.xls',
-                gdom: basePath + 'GDom.xls'
+        // ==================== JAVASCRIPT PRINCIPAL ====================
+        (function() {
+            // Variables globales
+            let romeData = {
+                metiers: [],
+                fiches: new Set(),
+                domaines: new Map(),
+                centresInteret: []
             };
+            let romeToFormation = new Map(); // code ROME -> liste de codes formation
 
-            const [bufPrincipal, bufRomeCod, bufGdom] = await Promise.all([
-                fetch(files.principal).then(r => { if (!r.ok) throw new Error('FCod.xls manquant'); return r.arrayBuffer(); }),
-                fetch(files.romecod).then(r => { if (!r.ok) throw new Error('RomeFCod.xls manquant'); return r.arrayBuffer(); }),
-                fetch(files.gdom).then(r => { if (!r.ok) throw new Error('GDom.xls manquant'); return r.arrayBuffer(); })
-            ]);
+            const LOAD_TIMEOUT = 8000; // 8 secondes
 
-            // Traitement du fichier principal (FCod.xls) – on prend le premier onglet pour les métiers
-            const wbPrincipal = XLSX.read(bufPrincipal, { type: 'array' });
-            const sheetPrincipal = wbPrincipal.Sheets[wbPrincipal.SheetNames[0]];
-            const rowsPrincipal = XLSX.utils.sheet_to_json(sheetPrincipal, { header: 1 });
-            processPrincipalData(rowsPrincipal);
+            // Initialisation
+            async function initApp() {
+                const timeoutId = setTimeout(() => {
+                    console.warn('Timeout chargement, utilisation des données de secours');
+                    loadFallbackData();
+                    updateUI();
+                    showAlert('Chargement en mode dégradé', 'warning');
+                }, LOAD_TIMEOUT);
 
-            // Centres d'intérêt : chercher un onglet avec "centre" dans le nom
-            const centreSheetName = wbPrincipal.SheetNames.find(name => name.toLowerCase().includes('centre'));
-            if (centreSheetName) {
-                const sheetCentre = wbPrincipal.Sheets[centreSheetName];
-                const rowsCentre = XLSX.utils.sheet_to_json(sheetCentre, { header: 1 });
-                processCentresData(rowsCentre);
-            } else {
-                console.warn('Onglet centres d\'intérêt non trouvé');
+                try {
+                    await loadAllData();
+                    clearTimeout(timeoutId);
+                    updateUI();
+                    setupNavigation();
+                    setupEvents();
+                    document.getElementById('updateDate').textContent = new Date().toLocaleDateString('fr-FR');
+                } catch (err) {
+                    clearTimeout(timeoutId);
+                    console.error('Erreur chargement', err);
+                    loadFallbackData();
+                    updateUI();
+                    showAlert('Erreur de chargement - mode dégradé', 'danger');
+                }
             }
 
-            // Traitement du fichier RomeFCod.xls
-            const wbRomeCod = XLSX.read(bufRomeCod, { type: 'array' });
-            const sheetRomeCod = wbRomeCod.Sheets[wbRomeCod.SheetNames[0]];
-            const rowsRomeCod = XLSX.utils.sheet_to_json(sheetRomeCod, { header: 1 });
-            processRomeCodData(rowsRomeCod);
+            async function loadAllData() {
+                const basePath = 'data/';
+                // On attend les trois fichiers
+                const files = [
+                    fetch(basePath + 'FCod.xls').then(r => { if (!r.ok) throw new Error('FCod.xls manquant'); return r.arrayBuffer(); }),
+                    fetch(basePath + 'RomeFCod.xls').then(r => { if (!r.ok) throw new Error('RomeFCod.xls manquant'); return r.arrayBuffer(); }),
+                    fetch(basePath + 'GDom.xls').then(r => { if (!r.ok) throw new Error('GDom.xls manquant'); return r.arrayBuffer(); })
+                ];
+                const [bufPrincipal, bufRomeCod, bufGdom] = await Promise.all(files);
 
-            // Traitement du fichier GDom.xls (pour enrichir les domaines si besoin)
-            const wbGdom = XLSX.read(bufGdom, { type: 'array' });
-            const sheetGdom = wbGdom.Sheets[wbGdom.SheetNames[0]];
-            const rowsGdom = XLSX.utils.sheet_to_json(sheetGdom, { header: 1 });
-            processGdomData(rowsGdom); // optionnel
-        }
+                // Traitement principal (FCod.xls) – on prend le premier onglet pour les métiers
+                const wbPrincipal = XLSX.read(bufPrincipal, { type: 'array' });
+                const sheetPrincipal = wbPrincipal.Sheets[wbPrincipal.SheetNames[0]];
+                const rowsPrincipal = XLSX.utils.sheet_to_json(sheetPrincipal, { header: 1 });
+                processPrincipalData(rowsPrincipal);
 
-        function processPrincipalData(rows) {
-            let currentDomaine = '';
-            let seen = new Set();
-            rows.forEach((row, idx) => {
-                if (idx < 4) return;
-                const codeDomaine = row[0] || '';
-                const codeSous = row[1] || '';
-                const codeFiche = row[2] || '';
-                const libelle = row[3] || '';
-                const codeOGR = row[4] ? String(row[4]).trim() : '';
-
-                if (codeDomaine && !codeSous && !codeFiche && libelle) {
-                    currentDomaine = codeDomaine;
-                    if (!romeData.domaines.has(codeDomaine)) {
-                        romeData.domaines.set(codeDomaine, { code: codeDomaine, libelle, count: 0 });
-                    }
+                // Centres d'intérêt : chercher un onglet avec "centre" dans le nom
+                const centreSheetName = wbPrincipal.SheetNames.find(name => name.toLowerCase().includes('centre'));
+                if (centreSheetName) {
+                    const sheetCentre = wbPrincipal.Sheets[centreSheetName];
+                    const rowsCentre = XLSX.utils.sheet_to_json(sheetCentre, { header: 1 });
+                    processCentresData(rowsCentre);
+                } else {
+                    console.warn('Onglet centres d\'intérêt non trouvé');
                 }
-                if (codeOGR && libelle) {
-                    const key = `${libelle}|${codeOGR}`;
-                    if (!seen.has(key)) {
-                        seen.add(key);
-                        romeData.metiers.push({ libelle, codeOGR, codeFiche, domaine: currentDomaine });
-                        if (codeFiche) romeData.fiches.add(codeFiche);
-                        if (currentDomaine && romeData.domaines.has(currentDomaine)) {
-                            romeData.domaines.get(currentDomaine).count++;
+
+                // Traitement RomeFCod.xls
+                const wbRomeCod = XLSX.read(bufRomeCod, { type: 'array' });
+                const sheetRomeCod = wbRomeCod.Sheets[wbRomeCod.SheetNames[0]];
+                const rowsRomeCod = XLSX.utils.sheet_to_json(sheetRomeCod, { header: 1 });
+                processRomeCodData(rowsRomeCod);
+
+                // Traitement GDom.xls (optionnel, pour enrichir)
+                const wbGdom = XLSX.read(bufGdom, { type: 'array' });
+                const sheetGdom = wbGdom.Sheets[wbGdom.SheetNames[0]];
+                const rowsGdom = XLSX.utils.sheet_to_json(sheetGdom, { header: 1 });
+                processGdomData(rowsGdom);
+            }
+
+            function processPrincipalData(rows) {
+                let currentDomaine = '';
+                let seen = new Set();
+                rows.forEach((row, idx) => {
+                    if (idx < 4) return; // ignorer en-têtes
+                    const codeDomaine = row[0] || '';
+                    const codeSous = row[1] || '';
+                    const codeFiche = row[2] || '';
+                    const libelle = row[3] || '';
+                    const codeOGR = row[4] ? String(row[4]).trim() : '';
+
+                    if (codeDomaine && !codeSous && !codeFiche && libelle) {
+                        currentDomaine = codeDomaine;
+                        if (!romeData.domaines.has(codeDomaine)) {
+                            romeData.domaines.set(codeDomaine, { code: codeDomaine, libelle, count: 0 });
                         }
                     }
-                }
-            });
-        }
-
-        function processCentresData(rows) {
-            let current = null;
-            rows.forEach((row, idx) => {
-                if (idx < 1) return;
-                const colA = row[0] || '';
-                const colB = row[1] || '';
-                if (colB && !colA && colB.includes('J\'')) {
-                    if (current) romeData.centresInteret.push(current);
-                    current = { libelle: colB, description: row[2] || '', codesRome: [] };
-                } else if (colA && colA.trim() && current) {
-                    current.codesRome.push(colA.trim());
-                }
-            });
-            if (current) romeData.centresInteret.push(current);
-        }
-
-        function processRomeCodData(rows) {
-            rows.forEach((row, idx) => {
-                if (idx < 1) return;
-                const codeRome = row[0] ? String(row[0]).trim() : '';
-                if (!codeRome) return;
-                const codes = [];
-                for (let i = 1; i < row.length; i++) {
-                    if (row[i] && typeof row[i] === 'string') {
-                        row[i].split('$').forEach(p => {
-                            const c = p.trim();
-                            if (c && /^\d+$/.test(c)) codes.push(c);
-                        });
+                    if (codeOGR && libelle) {
+                        const key = `${libelle}|${codeOGR}`;
+                        if (!seen.has(key)) {
+                            seen.add(key);
+                            romeData.metiers.push({ libelle, codeOGR, codeFiche, domaine: currentDomaine });
+                            if (codeFiche) romeData.fiches.add(codeFiche);
+                            if (currentDomaine && romeData.domaines.has(currentDomaine)) {
+                                romeData.domaines.get(currentDomaine).count++;
+                            }
+                        }
                     }
+                });
+            }
+
+            function processCentresData(rows) {
+                let current = null;
+                rows.forEach((row, idx) => {
+                    if (idx < 1) return;
+                    const colA = row[0] || '';
+                    const colB = row[1] || '';
+                    if (colB && !colA && colB.includes('J\'')) {
+                        if (current) romeData.centresInteret.push(current);
+                        current = { libelle: colB, description: row[2] || '', codesRome: [] };
+                    } else if (colA && colA.trim() && current) {
+                        current.codesRome.push(colA.trim());
+                    }
+                });
+                if (current) romeData.centresInteret.push(current);
+            }
+
+            function processRomeCodData(rows) {
+                rows.forEach((row, idx) => {
+                    if (idx < 1) return;
+                    const codeRome = row[0] ? String(row[0]).trim() : '';
+                    if (!codeRome) return;
+                    const codes = [];
+                    for (let i = 1; i < row.length; i++) {
+                        if (row[i] && typeof row[i] === 'string') {
+                            row[i].split('$').forEach(p => {
+                                const c = p.trim();
+                                if (c && /^\d+$/.test(c)) codes.push(c);
+                            });
+                        }
+                    }
+                    if (codes.length) romeToFormation.set(codeRome, codes);
+                });
+            }
+
+            function processGdomData(rows) {
+                // On pourrait éventuellement enrichir les domaines, mais pas nécessaire
+                // Juste pour éviter une erreur silencieuse
+            }
+
+            function loadFallbackData() {
+                romeData.metiers = [
+                    { libelle: 'Développeur informatique', codeOGR: 'M1805', codeFiche: 'M1805', domaine: 'M' },
+                    { libelle: 'Infirmier', codeOGR: 'J1501', codeFiche: 'J1501', domaine: 'J' },
+                    { libelle: 'Commercial', codeOGR: 'D1405', codeFiche: 'D1405', domaine: 'D' },
+                    { libelle: 'Assistant administratif', codeOGR: 'M1607', codeFiche: 'M1607', domaine: 'M' },
+                    { libelle: 'Conducteur routier', codeOGR: 'N1101', codeFiche: 'N1101', domaine: 'N' }
+                ];
+                romeData.fiches = new Set(romeData.metiers.map(m => m.codeFiche));
+                romeData.domaines.set('M', { code: 'M', libelle: 'Support à l\'entreprise', count: 2 });
+                romeData.domaines.set('J', { code: 'J', libelle: 'Santé', count: 1 });
+                romeData.domaines.set('D', { code: 'D', libelle: 'Commerce', count: 1 });
+                romeData.domaines.set('N', { code: 'N', libelle: 'Transport', count: 1 });
+                romeData.centresInteret = [
+                    { libelle: 'J\'aime être au contact de la nature', codesRome: ['A1206'] },
+                    { libelle: 'J\'ai le sens des affaires', codesRome: ['C1101'] }
+                ];
+                romeToFormation.set('M1805', ['31067']);
+                romeToFormation.set('J1501', ['43448']);
+                romeToFormation.set('D1405', ['34573']);
+            }
+
+            function updateUI() {
+                // Mise à jour des compteurs
+                document.getElementById('metiersCount').textContent = romeData.metiers.length + ' métiers';
+                document.getElementById('domainesCount').textContent = romeData.domaines.size + ' domaines';
+                document.getElementById('fichesCount').textContent = romeData.fiches.size + ' fiches';
+                document.getElementById('statMetiers').textContent = romeData.metiers.length;
+                document.getElementById('statFiches').textContent = romeData.fiches.size;
+                document.getElementById('statDomaines').textContent = romeData.domaines.size;
+                document.getElementById('statCentres').textContent = romeData.centresInteret.length;
+                document.getElementById('statsMetiers').textContent = romeData.metiers.length;
+
+                // Liste domaines accueil
+                const domList = document.getElementById('domainesList');
+                if (domList) {
+                    domList.innerHTML = '';
+                    romeData.domaines.forEach((d, code) => {
+                        domList.innerHTML += `<li class="mb-2"><span class="badge badge-primary me-2">${code}</span> ${d.libelle} (${d.count} métiers)</li>`;
+                    });
                 }
-                if (codes.length) romeToFormation.set(codeRome, codes);
-            });
-        }
 
-        function processGdomData(rows) {
-            // Optionnel : on pourrait lire les grands domaines, mais déjà présents dans les métiers
-        }
+                // Filtre domaine (dans le formulaire d'orientation) – on doit le créer s'il n'existe pas ?
+                // Le select existe déjà dans le HTML, on le remplit
+                const filter = document.getElementById('domaineFilter');
+                if (filter) {
+                    filter.innerHTML = '<option value="">Tous les domaines</option>';
+                    romeData.domaines.forEach((d, code) => {
+                        filter.innerHTML += `<option value="${code}">${d.libelle}</option>`;
+                    });
+                }
 
-        // Données de secours
-        function loadFallbackData() {
-            romeData.metiers = [
-                { libelle: 'Développeur informatique', codeOGR: 'M1805', codeFiche: 'M1805', domaine: 'M' },
-                { libelle: 'Infirmier', codeOGR: 'J1501', codeFiche: 'J1501', domaine: 'J' },
-                { libelle: 'Commercial', codeOGR: 'D1405', codeFiche: 'D1405', domaine: 'D' },
-                { libelle: 'Assistant administratif', codeOGR: 'M1607', codeFiche: 'M1607', domaine: 'M' },
-                { libelle: 'Conducteur routier', codeOGR: 'N1101', codeFiche: 'N1101', domaine: 'N' }
-            ];
-            romeData.fiches = new Set(romeData.metiers.map(m => m.codeFiche));
-            romeData.domaines.set('M', { code: 'M', libelle: 'Support à l\'entreprise', count: 2 });
-            romeData.domaines.set('J', { code: 'J', libelle: 'Santé', count: 1 });
-            romeData.domaines.set('D', { code: 'D', libelle: 'Commerce', count: 1 });
-            romeData.domaines.set('N', { code: 'N', libelle: 'Transport', count: 1 });
-            romeData.centresInteret = [
-                { libelle: 'J\'aime être au contact de la nature', codesRome: ['A1206'] },
-                { libelle: 'J\'ai le sens des affaires', codesRome: ['C1101'] }
-            ];
-            romeToFormation.set('M1805', ['31067']);
-            romeToFormation.set('J1501', ['43448']);
-            romeToFormation.set('D1405', ['34573']);
-        }
+                // Centres d'intérêt (select multiple)
+                const centreSelect = document.getElementById('centreInteret');
+                if (centreSelect) {
+                    centreSelect.innerHTML = '';
+                    romeData.centresInteret.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.libelle;
+                        opt.textContent = c.libelle;
+                        centreSelect.appendChild(opt);
+                    });
+                }
 
-        function updateUI() {
-            document.getElementById('metiersCount').textContent = romeData.metiers.length + ' métiers';
-            document.getElementById('domainesCount').textContent = romeData.domaines.size + ' domaines';
-            document.getElementById('fichesCount').textContent = romeData.fiches.size + ' fiches';
-            document.getElementById('statMetiers').textContent = romeData.metiers.length;
-            document.getElementById('statFiches').textContent = romeData.fiches.size;
-            document.getElementById('statDomaines').textContent = romeData.domaines.size;
-            document.getElementById('statCentres').textContent = romeData.centresInteret.length;
-            document.getElementById('statsMetiers').textContent = romeData.metiers.length;
+                // Liste des domaines (stats)
+                const statList = document.getElementById('domainesStatList');
+                if (statList) {
+                    statList.innerHTML = '';
+                    romeData.domaines.forEach((d, code) => {
+                        statList.innerHTML += `<li class="list-group-item d-flex justify-content-between"><span><strong>${code}</strong> - ${d.libelle}</span><span class="badge badge-primary">${d.count}</span></li>`;
+                    });
+                }
 
-            // Liste domaines accueil
-            const domList = document.getElementById('domainesList');
-            if (domList) {
-                domList.innerHTML = '';
-                romeData.domaines.forEach((d, code) => {
-                    domList.innerHTML += `<li class="mb-2"><span class="badge badge-primary me-2">${code}</span> ${d.libelle} (${d.count} métiers)</li>`;
+                // Top domaines
+                const topList = document.getElementById('topDomainesList');
+                if (topList) {
+                    topList.innerHTML = '';
+                    const sorted = Array.from(romeData.domaines.entries()).sort((a,b) => b[1].count - a[1].count).slice(0,5);
+                    sorted.forEach(([code, d]) => {
+                        topList.innerHTML += `<li class="list-group-item d-flex justify-content-between align-items-center">Domaine ${code} <span class="badge badge-primary rounded-pill">${d.count}</span></li>`;
+                    });
+                }
+            }
+
+            function setupNavigation() {
+                const links = document.querySelectorAll('.nav-link[data-section]');
+                const sections = document.querySelectorAll('.section');
+                links.forEach(l => {
+                    l.addEventListener('click', e => {
+                        e.preventDefault();
+                        links.forEach(lk => lk.classList.remove('active'));
+                        l.classList.add('active');
+                        sections.forEach(s => s.classList.remove('active'));
+                        document.getElementById(l.dataset.section).classList.add('active');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
                 });
-            }
-
-            // Filtre domaine
-            const filter = document.getElementById('domaineFilter');
-            if (filter) {
-                filter.innerHTML = '<option value="">Tous les domaines</option>';
-                romeData.domaines.forEach((d, code) => filter.innerHTML += `<option value="${code}">${d.libelle}</option>`);
-            }
-
-            // Centres d'intérêt
-            const centreSelect = document.getElementById('centreInteret');
-            if (centreSelect) {
-                centreSelect.innerHTML = '';
-                romeData.centresInteret.forEach(c => {
-                    const opt = document.createElement('option');
-                    opt.value = c.libelle;
-                    opt.textContent = c.libelle;
-                    centreSelect.appendChild(opt);
-                });
-            }
-
-            // Stats domaines
-            const statList = document.getElementById('domainesStatList');
-            if (statList) {
-                statList.innerHTML = '';
-                romeData.domaines.forEach((d, code) => {
-                    statList.innerHTML += `<li class="list-group-item d-flex justify-content-between"><span><strong>${code}</strong> - ${d.libelle}</span><span class="badge badge-primary">${d.count}</span></li>`;
-                });
-            }
-
-            const topList = document.getElementById('topDomainesList');
-            if (topList) {
-                topList.innerHTML = '';
-                const sorted = Array.from(romeData.domaines.entries()).sort((a,b) => b[1].count - a[1].count).slice(0,5);
-                sorted.forEach(([code, d]) => {
-                    topList.innerHTML += `<li class="list-group-item d-flex justify-content-between align-items-center">Domaine ${code} <span class="badge badge-primary rounded-pill">${d.count}</span></li>`;
-                });
-            }
-        }
-
-        function setupNavigation() {
-            const links = document.querySelectorAll('.nav-link[data-section]');
-            const sections = document.querySelectorAll('.section');
-            links.forEach(l => {
-                l.addEventListener('click', e => {
-                    e.preventDefault();
-                    links.forEach(lk => lk.classList.remove('active'));
-                    l.classList.add('active');
+                document.querySelector('.orientation-btn')?.addEventListener('click', () => {
+                    links.forEach(l => l.classList.remove('active'));
+                    document.querySelector('[data-section="orientation"]').classList.add('active');
                     sections.forEach(s => s.classList.remove('active'));
-                    document.getElementById(l.dataset.section).classList.add('active');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    document.getElementById('orientation').classList.add('active');
                 });
-            });
-            document.querySelector('.orientation-btn')?.addEventListener('click', () => {
-                links.forEach(l => l.classList.remove('active'));
-                document.querySelector('[data-section="orientation"]').classList.add('active');
-                sections.forEach(s => s.classList.remove('active'));
-                document.getElementById('orientation').classList.add('active');
-            });
-        }
+            }
 
-        function setupEvents() {
-            document.querySelectorAll('.competence-tag').forEach(t => {
-                t.addEventListener('click', function() { this.classList.toggle('selected'); updateCompetences(); });
-            });
-            document.getElementById('profileForm').addEventListener('submit', e => { e.preventDefault(); analyzeProfile(); });
-        }
+            function setupEvents() {
+                // Tags compétences
+                document.querySelectorAll('.competence-tag').forEach(t => {
+                    t.addEventListener('click', function() {
+                        this.classList.toggle('selected');
+                        updateCompetences();
+                    });
+                });
+                document.getElementById('profileForm').addEventListener('submit', e => {
+                    e.preventDefault();
+                    analyzeProfile();
+                });
+            }
 
-        function updateCompetences() {
-            document.getElementById('competences').value = Array.from(document.querySelectorAll('#competencesContainer .competence-tag.selected')).map(t => t.dataset.value).join(',');
-            document.getElementById('softSkills').value = Array.from(document.querySelectorAll('#softSkillsContainer .competence-tag.selected')).map(t => t.dataset.value).join(',');
-        }
+            function updateCompetences() {
+                document.getElementById('competences').value = Array.from(document.querySelectorAll('#competencesContainer .competence-tag.selected')).map(t => t.dataset.value).join(',');
+                document.getElementById('softSkills').value = Array.from(document.querySelectorAll('#softSkillsContainer .competence-tag.selected')).map(t => t.dataset.value).join(',');
+            }
 
-        function analyzeProfile() {
-            const secteur = document.getElementById('secteur').value;
-            const competences = document.getElementById('competences').value.split(',').filter(c => c);
-            const softSkills = document.getElementById('softSkills').value.split(',').filter(s => s);
-            const difficulties = ['logement','garde_enfant','sante','transport','formation'].filter(id => document.getElementById(id)?.checked);
-            if (difficulties.length) { displaySolutions(difficulties); document.getElementById('solutionsCard').classList.remove('d-none'); } else { document.getElementById('solutionsCard').classList.add('d-none'); }
+            function analyzeProfile() {
+                const secteur = document.getElementById('secteur').value;
+                const competences = document.getElementById('competences').value.split(',').filter(c => c);
+                const softSkills = document.getElementById('softSkills').value.split(',').filter(s => s);
+                const difficulties = ['logement','garde_enfant','sante','transport','formation'].filter(id => document.getElementById(id)?.checked);
 
-            const metiersScore = romeData.metiers.map(m => {
-                let score = 0, max = 0;
-                if (secteur) { max += 30; if (m.libelle.toLowerCase().includes(secteur) || (m.codeOGR && m.codeOGR.toLowerCase().includes(secteur[0]))) score += 30; }
-                competences.forEach(c => { max += 10; if (m.libelle.toLowerCase().includes(c)) score += 10; });
-                softSkills.forEach(s => { max += 5; if (s === 'communication' && m.libelle.toLowerCase().includes('commercial')) score += 5; if (s === 'organisation' && m.libelle.toLowerCase().includes('assistant')) score += 5; });
-                return { ...m, score: max ? Math.round((score/max)*100) : 0 };
-            }).sort((a,b) => b.score - a.score).slice(0,10);
-
-            displayMetiers(metiersScore);
-            const avg = Math.round(metiersScore.reduce((a,b)=>a+b.score,0)/metiersScore.length);
-            document.getElementById('avgScore').textContent = avg + '%';
-            document.getElementById('resultsSection').classList.remove('d-none');
-            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function displayMetiers(metiers) {
-            const container = document.getElementById('metiersList');
-            container.innerHTML = '';
-            metiers.forEach(m => {
-                const codes = romeToFormation.get(m.codeOGR) || [];
-                let lien = '#';
-                if (codes.length) {
-                    const params = codes.map(c => 'FORMACODE-' + c).join(',');
-                    lien = `https://candidat.francetravail.fr/formations/recherche?filtreEstFormationEnCoursOuAVenir=formEnCours&quoi=${encodeURIComponent(params)}&range=0-9&tri=0`;
+                if (difficulties.length) {
+                    displaySolutions(difficulties);
+                    document.getElementById('solutionsCard').classList.remove('d-none');
+                } else {
+                    document.getElementById('solutionsCard').classList.add('d-none');
                 }
-                const item = document.createElement('div');
-                item.className = 'list-group-item list-group-item-action';
-                item.innerHTML = `
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h6 class="mb-1">${m.libelle}</h6>
-                            <small class="text-muted">Code: ${m.codeOGR} | Domaine: ${m.domaine}</small>
-                            <div class="mt-2">${codes.length ? `<a href="${lien}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-search me-1"></i>Voir les formations (${codes.length})</a>` : '<span class="text-muted">Aucune formation référencée</span>'}</div>
+
+                const metiersScore = romeData.metiers.map(m => {
+                    let score = 0, max = 0;
+                    if (secteur) {
+                        max += 30;
+                        if (m.libelle.toLowerCase().includes(secteur) || (m.codeOGR && m.codeOGR.toLowerCase().includes(secteur[0]))) score += 30;
+                    }
+                    competences.forEach(c => {
+                        max += 10;
+                        if (m.libelle.toLowerCase().includes(c)) score += 10;
+                    });
+                    softSkills.forEach(s => {
+                        max += 5;
+                        if (s === 'communication' && m.libelle.toLowerCase().includes('commercial')) score += 5;
+                        if (s === 'organisation' && m.libelle.toLowerCase().includes('assistant')) score += 5;
+                    });
+                    return { ...m, score: max ? Math.round((score/max)*100) : 0 };
+                }).sort((a,b) => b.score - a.score).slice(0,10);
+
+                displayMetiers(metiersScore);
+                const avg = Math.round(metiersScore.reduce((a,b)=>a+b.score,0)/metiersScore.length);
+                document.getElementById('avgScore').textContent = avg + '%';
+                document.getElementById('resultsSection').classList.remove('d-none');
+                document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+            }
+
+            function displayMetiers(metiers) {
+                const container = document.getElementById('metiersList');
+                container.innerHTML = '';
+                metiers.forEach(m => {
+                    const codes = romeToFormation.get(m.codeOGR) || [];
+                    let lien = '#';
+                    if (codes.length) {
+                        const params = codes.map(c => 'FORMACODE-' + c).join(',');
+                        lien = `https://candidat.francetravail.fr/formations/recherche?filtreEstFormationEnCoursOuAVenir=formEnCours&quoi=${encodeURIComponent(params)}&range=0-9&tri=0`;
+                    }
+                    const item = document.createElement('div');
+                    item.className = 'list-group-item list-group-item-action';
+                    item.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">${m.libelle}</h6>
+                                <small class="text-muted">Code: ${m.codeOGR} | Domaine: ${m.domaine}</small>
+                                <div class="mt-2">${codes.length ? `<a href="${lien}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-search me-1"></i>Voir les formations (${codes.length})</a>` : '<span class="text-muted">Aucune formation référencée</span>'}</div>
+                            </div>
+                            <span class="badge badge-primary fs-6">${m.score}%</span>
                         </div>
-                        <span class="badge badge-primary fs-6">${m.score}%</span>
-                    </div>
-                `;
-                container.appendChild(item);
-            });
-        }
+                    `;
+                    container.appendChild(item);
+                });
+            }
 
-        function displaySolutions(diff) {
-            const sols = {
-                logement: ['Action Logement : Aide à la mobilité','APL','Garantie Visale'],
-                garde_enfant: ['CMG','Crèches places d\'urgence','Aide garde enfant'],
-                sante: ['CMU-C','ACS','Consultations PASS'],
-                transport: ['Aide à l\'achat véhicule','Forfait mobilités durables','Permis à 1€'],
-                formation: ['CPF','POEC','AIF']
-            };
-            const container = document.getElementById('solutionsContainer');
-            container.innerHTML = '';
-            diff.forEach(d => {
-                if (sols[d]) {
-                    const col = document.createElement('div');
-                    col.className = 'col-md-6 mb-3';
-                    col.innerHTML = `<div class="solution-card"><h6>${getLabel(d)}</h6><ul class="mb-0">${sols[d].map(s => `<li><small>${s}</small></li>`).join('')}</ul></div>`;
-                    container.appendChild(col);
-                }
-            });
-        }
+            function displaySolutions(diff) {
+                const solutions = {
+                    logement: ['Action Logement : Aide à la mobilité', 'APL', 'Garantie Visale'],
+                    garde_enfant: ['CMG', 'Crèches places d\'urgence', 'Aide garde enfant'],
+                    sante: ['CMU-C', 'ACS', 'Consultations PASS'],
+                    transport: ['Aide à l\'achat véhicule', 'Forfait mobilités durables', 'Permis à 1€'],
+                    formation: ['CPF', 'POEC', 'AIF']
+                };
+                const container = document.getElementById('solutionsContainer');
+                container.innerHTML = '';
+                diff.forEach(d => {
+                    if (solutions[d]) {
+                        const col = document.createElement('div');
+                        col.className = 'col-md-6 mb-3';
+                        col.innerHTML = `<div class="solution-card"><h6>${getLabel(d)}</h6><ul class="mb-0">${solutions[d].map(s => `<li><small>${s}</small></li>`).join('')}</ul></div>`;
+                        container.appendChild(col);
+                    }
+                });
+            }
 
-        function getLabel(k) {
-            const labels = { logement:'🏠 Logement', garde_enfant:'👶 Garde d\'enfant', sante:'🏥 Santé', transport:'🚗 Transport', formation:'📚 Formation' };
-            return labels[k] || k;
-        }
+            function getLabel(k) {
+                const labels = { logement:'🏠 Logement', garde_enfant:'👶 Garde d\'enfant', sante:'🏥 Santé', transport:'🚗 Transport', formation:'📚 Formation' };
+                return labels[k] || k;
+            }
 
-        function toggleNavbar() { document.getElementById('navbarNav').classList.toggle('show'); }
-        function switchTab(tab) {
-            document.querySelectorAll('#aidesTab .nav-link').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-            document.querySelectorAll('#aidesTabContent .tab-pane').forEach(p => p.classList.remove('active'));
-            document.getElementById(tab + '-content').classList.add('active');
-        }
-        function showAlert(msg, type) {
-            const a = document.createElement('div');
-            a.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3`;
-            a.style.zIndex = '9999';
-            a.innerHTML = msg + '<button type="button" class="btn-close" onclick="this.parentElement.remove()">×</button>';
-            document.body.appendChild(a);
-            setTimeout(() => a.remove(), 5000);
-        }
+            function toggleNavbar() {
+                document.getElementById('navbarNav').classList.toggle('show');
+            }
 
-        window.toggleNavbar = toggleNavbar;
-        window.switchTab = switchTab;
+            function switchTab(tabName) {
+                // Désactiver tous les onglets
+                document.querySelectorAll('#aidesTab .nav-link').forEach(t => t.classList.remove('active'));
+                // Activer l'onglet cliqué (event.target)
+                event.target.classList.add('active');
+                // Masquer tous les contenus
+                document.querySelectorAll('#aidesTabContent .tab-pane').forEach(p => p.classList.remove('active'));
+                // Afficher le bon
+                document.getElementById(tabName + '-content').classList.add('active');
+            }
+
+            function showAlert(msg, type) {
+                const a = document.createElement('div');
+                a.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3`;
+                a.style.zIndex = '9999';
+                a.innerHTML = msg + '<button type="button" class="btn-close" onclick="this.parentElement.remove()">×</button>';
+                document.body.appendChild(a);
+                setTimeout(() => a.remove(), 5000);
+            }
+
+            // Rendre les fonctions globales pour les appels onclick
+            window.toggleNavbar = toggleNavbar;
+            window.switchTab = switchTab;
+
+            // Lancer l'application
+            initApp();
+        })();
     </script>
 </body>
 </html>
