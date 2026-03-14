@@ -750,6 +750,20 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Nouveau champ : centre d'intérêt -->
+                        <div class="row mt-4">
+                            <div class="col-md-6 offset-md-3">
+                                <div class="form-group">
+                                    <label class="form-label">Centre d'intérêt (ROME) :</label>
+                                    <select class="form-select" id="centreInteret">
+                                        <option value="">Choisissez un centre d'intérêt</option>
+                                    </select>
+                                    <small class="text-muted">Sélectionnez un centre d'intérêt pour affiner les recommandations.</small>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="text-center mt-4"><button type="submit" class="btn btn-primary px-5"><i class="fas fa-rocket me-2"></i>Analyser mon profil</button></div>
                     </form>
                 </div>
@@ -924,29 +938,20 @@
 
             async function loadAllData() {
                 const basePath = 'data/';
-                // On attend les trois fichiers
+                // On attend les quatre fichiers
                 const files = [
                     fetch(basePath + 'FCod.xls').then(r => { if (!r.ok) throw new Error('FCod.xls manquant'); return r.arrayBuffer(); }),
                     fetch(basePath + 'RomeFCod.xls').then(r => { if (!r.ok) throw new Error('RomeFCod.xls manquant'); return r.arrayBuffer(); }),
-                    fetch(basePath + 'GDom.xls').then(r => { if (!r.ok) throw new Error('GDom.xls manquant'); return r.arrayBuffer(); })
+                    fetch(basePath + 'GDom.xls').then(r => { if (!r.ok) throw new Error('GDom.xls manquant'); return r.arrayBuffer(); }),
+                    fetch(basePath + 'ROME_arbo_centres_2025.xlsx').then(r => { if (!r.ok) throw new Error('ROME_arbo_centres_2025.xlsx manquant'); return r.arrayBuffer(); })
                 ];
-                const [bufPrincipal, bufRomeCod, bufGdom] = await Promise.all(files);
+                const [bufPrincipal, bufRomeCod, bufGdom, bufCentres] = await Promise.all(files);
 
                 // Traitement principal (FCod.xls) – on prend le premier onglet pour les métiers
                 const wbPrincipal = XLSX.read(bufPrincipal, { type: 'array' });
                 const sheetPrincipal = wbPrincipal.Sheets[wbPrincipal.SheetNames[0]];
                 const rowsPrincipal = XLSX.utils.sheet_to_json(sheetPrincipal, { header: 1 });
                 processPrincipalData(rowsPrincipal);
-
-                // Centres d'intérêt : chercher un onglet avec "centre" dans le nom
-                const centreSheetName = wbPrincipal.SheetNames.find(name => name.toLowerCase().includes('centre'));
-                if (centreSheetName) {
-                    const sheetCentre = wbPrincipal.Sheets[centreSheetName];
-                    const rowsCentre = XLSX.utils.sheet_to_json(sheetCentre, { header: 1 });
-                    processCentresData(rowsCentre);
-                } else {
-                    console.warn('Onglet centres d\'intérêt non trouvé');
-                }
 
                 // Traitement RomeFCod.xls
                 const wbRomeCod = XLSX.read(bufRomeCod, { type: 'array' });
@@ -959,6 +964,20 @@
                 const sheetGdom = wbGdom.Sheets[wbGdom.SheetNames[0]];
                 const rowsGdom = XLSX.utils.sheet_to_json(sheetGdom, { header: 1 });
                 processGdomData(rowsGdom);
+
+                // Traitement des centres d'intérêt
+                const wbCentres = XLSX.read(bufCentres, { type: 'array' });
+                // Chercher un onglet avec "Centre" dans le nom
+                const centreSheetName = wbCentres.SheetNames.find(name => 
+                    name.toLowerCase().includes('centre') || name.toLowerCase().includes("d'intérêt")
+                );
+                if (centreSheetName) {
+                    const sheetCentre = wbCentres.Sheets[centreSheetName];
+                    const rowsCentre = XLSX.utils.sheet_to_json(sheetCentre, { header: 1 });
+                    processCentresData(rowsCentre);
+                } else {
+                    console.warn('Onglet centres d\'intérêt non trouvé dans ROME_arbo_centres_2025.xlsx');
+                }
             }
 
             function processPrincipalData(rows) {
@@ -993,19 +1012,28 @@
             }
 
             function processCentresData(rows) {
-                let current = null;
-                rows.forEach((row, idx) => {
-                    if (idx < 1) return;
-                    const colA = row[0] || '';
-                    const colB = row[1] || '';
+                let currentCentre = null;
+                for (let i = 0; i < rows.length; i++) {
+                    const row = rows[i];
+                    const colA = row[0] ? String(row[0]).trim() : '';
+                    const colB = row[1] ? String(row[1]).trim() : '';
+                    const colC = row[2] ? String(row[2]).trim() : '';
+
+                    // Détection d'un nouveau centre : la colonne B contient une phrase (souvent longue) et la colonne A est vide
                     if (colB && !colA && colB.includes('J\'')) {
-                        if (current) romeData.centresInteret.push(current);
-                        current = { libelle: colB, description: row[2] || '', codesRome: [] };
-                    } else if (colA && colA.trim() && current) {
-                        current.codesRome.push(colA.trim());
+                        if (currentCentre) romeData.centresInteret.push(currentCentre);
+                        currentCentre = {
+                            libelle: colB,
+                            description: colC || '',
+                            codesRome: []
+                        };
                     }
-                });
-                if (current) romeData.centresInteret.push(current);
+                    // Si on a un centre courant et que la colonne A contient un code ROME (ex: A1206)
+                    else if (currentCentre && colA && /^[A-Z]\d{4}$/.test(colA)) {
+                        currentCentre.codesRome.push(colA);
+                    }
+                }
+                if (currentCentre) romeData.centresInteret.push(currentCentre);
             }
 
             function processRomeCodData(rows) {
@@ -1027,7 +1055,7 @@
             }
 
             function processGdomData(rows) {
-                // On pourrait éventuellement enrichir les domaines, mais pas nécessaire
+                // Optionnel : on peut enrichir les domaines, mais pas nécessaire
                 // Juste pour éviter une erreur silencieuse
             }
 
@@ -1073,8 +1101,7 @@
                     });
                 }
 
-                // Filtre domaine (dans le formulaire d'orientation) – on doit le créer s'il n'existe pas ?
-                // Le select existe déjà dans le HTML, on le remplit
+                // Filtre domaine (dans le formulaire d'orientation)
                 const filter = document.getElementById('domaineFilter');
                 if (filter) {
                     filter.innerHTML = '<option value="">Tous les domaines</option>';
@@ -1086,7 +1113,7 @@
                 // Centres d'intérêt (select multiple)
                 const centreSelect = document.getElementById('centreInteret');
                 if (centreSelect) {
-                    centreSelect.innerHTML = '';
+                    centreSelect.innerHTML = '<option value="">Choisissez un centre d'intérêt</option>';
                     romeData.centresInteret.forEach(c => {
                         const opt = document.createElement('option');
                         opt.value = c.libelle;
@@ -1157,6 +1184,7 @@
 
             function analyzeProfile() {
                 const secteur = document.getElementById('secteur').value;
+                const centre = document.getElementById('centreInteret').value;
                 const competences = document.getElementById('competences').value.split(',').filter(c => c);
                 const softSkills = document.getElementById('softSkills').value.split(',').filter(s => s);
                 const difficulties = ['logement','garde_enfant','sante','transport','formation'].filter(id => document.getElementById(id)?.checked);
@@ -1183,6 +1211,14 @@
                         if (s === 'communication' && m.libelle.toLowerCase().includes('commercial')) score += 5;
                         if (s === 'organisation' && m.libelle.toLowerCase().includes('assistant')) score += 5;
                     });
+                    // Bonus si le métier appartient au centre d'intérêt sélectionné
+                    if (centre) {
+                        const centreObj = romeData.centresInteret.find(c => c.libelle === centre);
+                        if (centreObj && centreObj.codesRome.includes(m.codeOGR)) {
+                            max += 20;
+                            score += 20;
+                        }
+                    }
                     return { ...m, score: max ? Math.round((score/max)*100) : 0 };
                 }).sort((a,b) => b.score - a.score).slice(0,10);
 
