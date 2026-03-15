@@ -7,7 +7,6 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* (Conservez l'intégralité du CSS inchangé) */
         :root {
             --primary: #0055a4;
             --primary-dark: #003f7f;
@@ -387,10 +386,10 @@
             display: inline-block;
             background: rgba(0,85,164,0.1);
             color: var(--primary);
-            padding: 0.5rem 1.25rem;
+            padding: 0.25rem 0.75rem;  /* réduit */
             border-radius: 50rem;
-            margin: 0.25rem;
-            font-size: 0.95rem;
+            margin: 0.2rem;             /* réduit */
+            font-size: 0.85rem;          /* réduit */
             border: 1px solid rgba(0,85,164,0.2);
             cursor: pointer;
             transition: var(--transition-base);
@@ -634,7 +633,6 @@
                 <div class="col-md-4"><div class="feature-card"><i class="fas fa-sitemap"></i><h4>Grands domaines</h4><p>14 grands domaines professionnels</p><span class="badge badge-success" id="domainesCount">Chargement...</span></div></div>
                 <div class="col-md-4"><div class="feature-card"><i class="fas fa-tags"></i><h4>Fiches ROME</h4><p>Descriptifs détaillés</p><span class="badge badge-warning" id="fichesCount">Chargement...</span></div></div>
             </div>
-            <!-- Suppression de la carte "Classification officielle" -->
         </section>
 
         <section id="orientation" class="section">
@@ -669,7 +667,7 @@
                                     <div class="card-header bg-light"><h5><i class="fas fa-tools me-2"></i>Compétences</h5></div>
                                     <div class="card-body">
                                         <div class="form-group"><label class="form-label">Compétences techniques</label>
-                                            <div id="competencesContainer">
+                                            <div id="competencesContainer" style="display: flex; flex-wrap: wrap; gap: 0.2rem;">
                                                 <span class="competence-tag" data-value="informatique">Informatique</span>
                                                 <span class="competence-tag" data-value="programmation">Programmation</span>
                                                 <span class="competence-tag" data-value="gestion">Gestion</span>
@@ -681,7 +679,7 @@
                                             <input type="hidden" id="competences">
                                         </div>
                                         <div class="form-group"><label class="form-label">Soft Skills</label>
-                                            <div id="softSkillsContainer">
+                                            <div id="softSkillsContainer" style="display: flex; flex-wrap: wrap; gap: 0.2rem;">
                                                 <span class="competence-tag" data-value="communication">Communication</span>
                                                 <span class="competence-tag" data-value="organisation">Organisation</span>
                                                 <span class="competence-tag" data-value="adaptation">Adaptation</span>
@@ -795,8 +793,6 @@
                 </div>
             </div>
         </section>
-
-        <!-- Suppression de la section stats -->
     </div>
 
     <footer class="footer">
@@ -861,12 +857,17 @@
                     processConverted2(data2);
                 }
 
+                // Ajouter les centres d'intérêt supplémentaires (sans codes pour l'instant)
+                addManualCentresInteret();
+
                 clearTimeout(timeoutId);
                 updateUI();
             } catch (err) {
                 clearTimeout(timeoutId);
                 console.error('Erreur chargement', err);
                 loadFallbackData();
+                // Ajouter les centres d'intérêt supplémentaires même en mode dégradé
+                addManualCentresInteret();
                 updateUI();
                 showAlert('Erreur de chargement - mode dégradé', 'danger');
             }
@@ -978,6 +979,26 @@
             console.log('Centres d\'intérêt chargés:', romeData.centresInteret.length);
         }
 
+        function addManualCentresInteret() {
+            const manuels = [
+                "22 - Je souhaite prendre soin des autres",
+                "23 - Je souhaite protéger et secourir",
+                "24 - Je souhaite transmettre",
+                "25 - Je suis amateur / amatrice de sensations fortes",
+                "26 - Je suis attiré / attirée par l'envers du décor",
+                "27 - Je suis passionné / passionnée par la cuisine",
+                "28 - Je suis passionné / passionnée par les autres cultures",
+                "29 - Je suis passionné / passionnée par les nouvelles technologies",
+                "30 - Je suis un / une artiste"
+            ];
+            manuels.forEach(libelle => {
+                // Éviter les doublons
+                if (!romeData.centresInteret.some(c => c.libelle === libelle)) {
+                    romeData.centresInteret.push({ libelle, codesRome: [] });
+                }
+            });
+        }
+
         function processConverted4(data) {
             // Construire un dictionnaire codeOGR -> { codeROME, libelle }
             // et enrichir les métiers avec leurs appellations
@@ -1063,8 +1084,6 @@
             document.getElementById('fichesCount').textContent = romeData.fiches.size + ' fiches';
             document.getElementById('statsMetiers').textContent = romeData.metiers.length;
 
-            // Suppression des éléments stats, donc plus besoin de les mettre à jour
-
             const centreSelect = document.getElementById('centreInteret');
             if (centreSelect) {
                 centreSelect.innerHTML = '<option value="">Choisissez un centre d\'intérêt</option>';
@@ -1139,6 +1158,7 @@
                     const codesRomeSet = new Set(centreObj.codesRome);
                     metiersCibles = metiersCibles.filter(m => codesRomeSet.has(m.codeROME));
                 }
+                // Si le centre n'a pas de codes, on ne filtre pas
             }
 
             const metiersScore = metiersCibles.map(m => {
