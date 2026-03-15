@@ -967,9 +967,9 @@
 
                 // Traitement des centres d'intérêt
                 const wbCentres = XLSX.read(bufCentres, { type: 'array' });
-                // Chercher un onglet avec "Centre" dans le nom
+                // Chercher un onglet avec "Centre" dans le nom (on évite l'apostrophe pour plus de sécurité)
                 const centreSheetName = wbCentres.SheetNames.find(name => 
-                    name.toLowerCase().includes('centre') || name.toLowerCase().includes("d'intérêt")
+                    name.toLowerCase().includes('centre')
                 );
                 if (centreSheetName) {
                     const sheetCentre = wbCentres.Sheets[centreSheetName];
@@ -1113,7 +1113,7 @@
                 // Centres d'intérêt (select multiple)
                 const centreSelect = document.getElementById('centreInteret');
                 if (centreSelect) {
-                    centreSelect.innerHTML = '<option value="">Choisissez un centre d'intérêt</option>';
+                    centreSelect.innerHTML = '<option value="">Choisissez un centre d\'intérêt</option>';
                     romeData.centresInteret.forEach(c => {
                         const opt = document.createElement('option');
                         opt.value = c.libelle;
