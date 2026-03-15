@@ -614,7 +614,6 @@
                     <li class="nav-item"><a class="nav-link active" data-section="home" href="#home"><i class="fas fa-home"></i>Accueil</a></li>
                     <li class="nav-item"><a class="nav-link" data-section="orientation" href="#orientation"><i class="fas fa-compass"></i>Orientation</a></li>
                     <li class="nav-item"><a class="nav-link" data-section="difficulties" href="#difficulties"><i class="fas fa-hands-helping"></i>Aides</a></li>
-                    <li class="nav-item"><a class="nav-link" data-section="stats" href="#stats"><i class="fas fa-chart-bar"></i>Statistiques</a></li>
                 </ul>
             </div>
         </div>
@@ -635,15 +634,7 @@
                 <div class="col-md-4"><div class="feature-card"><i class="fas fa-sitemap"></i><h4>Grands domaines</h4><p>14 grands domaines professionnels</p><span class="badge badge-success" id="domainesCount">Chargement...</span></div></div>
                 <div class="col-md-4"><div class="feature-card"><i class="fas fa-tags"></i><h4>Fiches ROME</h4><p>Descriptifs détaillés</p><span class="badge badge-warning" id="fichesCount">Chargement...</span></div></div>
             </div>
-            <div class="card border-0 bg-light mt-4">
-                <div class="card-body p-5">
-                    <h3 class="text-center mb-4">Classification officielle des métiers</h3>
-                    <div class="row">
-                        <div class="col-md-6"><ul class="list-unstyled" id="domainesList"></ul></div>
-                        <div class="col-md-6"><div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>Données mises à jour : Référentiel ROME v4.6.0 - Septembre 2025</div></div>
-                    </div>
-                </div>
-            </div>
+            <!-- Suppression de la carte "Classification officielle" -->
         </section>
 
         <section id="orientation" class="section">
@@ -805,24 +796,7 @@
             </div>
         </section>
 
-        <section id="stats" class="section">
-            <div class="card shadow-lg">
-                <div class="card-header bg-gradient-primary"><i class="fas fa-chart-bar me-2"></i>Statistiques ROME 4.0</div>
-                <div class="card-body">
-                    <div class="row mb-4">
-                        <div class="col-md-3"><div class="stat-card"><h1 class="text-primary" id="statMetiers">-</h1><p>Appellations de métiers</p></div></div>
-                        <div class="col-md-3"><div class="stat-card"><h1 class="text-success" id="statFiches">-</h1><p>Fiches ROME</p></div></div>
-                        <div class="col-md-3"><div class="stat-card"><h1 class="text-warning" id="statDomaines">-</h1><p>Grands domaines</p></div></div>
-                        <div class="col-md-3"><div class="stat-card"><h1 class="text-info" id="statCentres">-</h1><p>Centres d'intérêt</p></div></div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-8"><div class="card"><div class="card-header bg-primary text-white"><h5>Liste des domaines</h5></div><div class="card-body"><ul class="list-group" id="domainesStatList"></ul></div></div></div>
-                        <div class="col-lg-4"><div class="card h-100"><div class="card-header bg-success text-white"><h5>Top domaines</h5></div><div class="card-body"><ul class="list-group list-group-flush" id="topDomainesList"></ul></div></div></div>
-                    </div>
-                    <div class="alert alert-info mt-4"><i class="fas fa-database me-2"></i><strong>Source :</strong> Référentiel opérationnel des métiers et emplois (ROME) - Version 4.6.0 (septembre 2025)</div>
-                </div>
-            </div>
-        </section>
+        <!-- Suppression de la section stats -->
     </div>
 
     <footer class="footer">
@@ -1087,19 +1061,9 @@
             document.getElementById('metiersCount').textContent = romeData.metiers.length + ' métiers';
             document.getElementById('domainesCount').textContent = romeData.domaines.size + ' domaines';
             document.getElementById('fichesCount').textContent = romeData.fiches.size + ' fiches';
-            document.getElementById('statMetiers').textContent = romeData.metiers.length;
-            document.getElementById('statFiches').textContent = romeData.fiches.size;
-            document.getElementById('statDomaines').textContent = romeData.domaines.size;
-            document.getElementById('statCentres').textContent = romeData.centresInteret.length;
             document.getElementById('statsMetiers').textContent = romeData.metiers.length;
 
-            const domList = document.getElementById('domainesList');
-            if (domList) {
-                domList.innerHTML = '';
-                romeData.domaines.forEach((d, code) => {
-                    domList.innerHTML += `<li class="mb-2"><span class="badge badge-primary me-2">${code}</span> ${d.libelle} (${d.count} métiers)</li>`;
-                });
-            }
+            // Suppression des éléments stats, donc plus besoin de les mettre à jour
 
             const centreSelect = document.getElementById('centreInteret');
             if (centreSelect) {
@@ -1109,23 +1073,6 @@
                     opt.value = c.libelle;
                     opt.textContent = c.libelle;
                     centreSelect.appendChild(opt);
-                });
-            }
-
-            const statList = document.getElementById('domainesStatList');
-            if (statList) {
-                statList.innerHTML = '';
-                romeData.domaines.forEach((d, code) => {
-                    statList.innerHTML += `<li class="list-group-item d-flex justify-content-between"><span><strong>${code}</strong> - ${d.libelle}</span><span class="badge badge-primary">${d.count}</span></li>`;
-                });
-            }
-
-            const topList = document.getElementById('topDomainesList');
-            if (topList) {
-                topList.innerHTML = '';
-                const sorted = Array.from(romeData.domaines.entries()).sort((a,b) => b[1].count - a[1].count).slice(0,5);
-                sorted.forEach(([code, d]) => {
-                    topList.innerHTML += `<li class="list-group-item d-flex justify-content-between align-items-center">Domaine ${code} <span class="badge badge-primary rounded-pill">${d.count}</span></li>`;
                 });
             }
         }
@@ -1237,7 +1184,7 @@
                             <h6 class="mb-1">${m.libelle}</h6>
                             <small class="text-muted">Code: ${m.codeROME} | Domaine: ${m.domaine}</small>
                             ${m.appellations && m.appellations.length > 1 ? `<small class="d-block text-muted">+ ${m.appellations.length-1} autre(s) appellation(s)</small>` : ''}
-                            <div class="mt-2">${codes.length ? `<a href="${lien}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-search me-1"></i>Voir les formations (${codes.length})</a>` : '<span class="text-muted">Aucune formation référencée</span>'}</div>
+                            <div class="mt-2">${codes.length ? `<a href="${lien}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-search me-1"></i>Voir la formation</a>` : '<span class="text-muted">Aucune formation référencée</span>'}</div>
                         </div>
                         <span class="badge badge-primary fs-6">${m.score}%</span>
                     </div>
