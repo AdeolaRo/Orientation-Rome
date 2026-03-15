@@ -7,7 +7,7 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* (Conservez tout le CSS inchangé) */
+        /* (Conservez l'intégralité du CSS inchangé) */
         :root {
             --primary: #0055a4;
             --primary-dark: #003f7f;
@@ -839,12 +839,12 @@
     <script>
     (function() {
         let romeData = {
-            metiers: [],          // { codeOGR, libelle, domaine }
+            metiers: [],          // { codeROME, libelle, domaine, appellations: [] }
             fiches: new Set(),    // codes uniques des fiches
             domaines: new Map(),  // Map domaine -> { code, libelle, count }
-            centresInteret: []    // centres d'intérêt (peupler si disponible)
+            centresInteret: []    // { libelle, codesRome: [] }
         };
-        let romeToFormation = new Map(); // Map codeOGR -> [codes formation]
+        let romeToFormation = new Map(); // Map codeROME -> [codes formation]
 
         const LOAD_TIMEOUT = 10000; // 10 secondes
 
@@ -866,17 +866,20 @@
                     fetch('data/converted5.json').catch(err => { console.error('Erreur converted5:', err); return null; })
                 ]);
 
-                // Vérifier que converted5.json est chargé
                 if (!resp5 || !resp5.ok) {
                     throw new Error('Fichier converted5.json manquant ou inaccessible');
                 }
-
                 const data5 = await resp5.json();
                 processConverted5(data5);
 
-                // Vérifier que des métiers ont bien été extraits
-                if (romeData.metiers.length === 0) {
-                    throw new Error('Aucun métier trouvé dans converted5.json');
+                if (resp3 && resp3.ok) {
+                    const data3 = await resp3.json();
+                    processConverted3(data3);
+                }
+
+                if (resp4 && resp4.ok) {
+                    const data4 = await resp4.json();
+                    processConverted4(data4);
                 }
 
                 if (resp2 && resp2.ok) {
@@ -885,7 +888,6 @@
                 }
 
                 clearTimeout(timeoutId);
-                // Pas d'alerte de succès
                 updateUI();
             } catch (err) {
                 clearTimeout(timeoutId);
@@ -906,29 +908,17 @@
 
             data.forEach((item, idx) => {
                 const keys = Object.keys(item);
-                // Trouver la clé qui est un code ROME (ex: "A1101")
                 const codeSrcKey = keys.find(k => /^[A-Z]\d{4}$/.test(k));
-                if (!codeSrcKey) {
-                    console.log(`Objet ${idx} : pas de code ROME en clé, ignoré`);
-                    return;
-                }
+                if (!codeSrcKey) return;
                 const codeSrc = codeSrcKey;
                 const codeTarget = item[codeSrcKey];
-                if (!codeTarget || !/^[A-Z]\d{4}$/.test(codeTarget)) {
-                    console.log(`Objet ${idx} : code cible invalide (${codeTarget}), ignoré`);
-                    return;
-                }
+                if (!codeTarget || !/^[A-Z]\d{4}$/.test(codeTarget)) return;
 
-                // Trouver la clé longue qui contient des '$' (liste des codes formation)
                 const longKey = keys.find(k => item[k] && typeof item[k] === 'string' && item[k].includes('$'));
-                if (!longKey) {
-                    console.log(`Objet ${idx} : pas de liste de codes formation, ignoré`);
-                    return;
-                }
+                if (!longKey) return;
 
-                // La clé longue contient la liste des codes pour la source
-                const listSrc = longKey; // c'est la chaîne avec les codes pour la source
-                const listTarget = item[longKey]; // c'est la chaîne avec les codes pour la cible
+                const listSrc = longKey;
+                const listTarget = item[longKey];
 
                 const extractCodes = (str) => {
                     if (!str) return [];
@@ -945,25 +935,23 @@
                 const codesFormSrc = extractCodes(listSrc);
                 const codesFormTarget = extractCodes(listTarget);
 
-                // Libellés : on prend le premier champ texte (celui après le code source) comme libellé source
                 const libelleSrc = item[keys.find(k => typeof item[k] === 'string' && !k.match(/^[A-Z]\d{4}$/) && !item[k].includes('$'))] || '?';
-                // Pour le libellé cible, on n'a pas d'information directe, on utilise le code lui-même
                 const libelleTarget = codeTarget;
 
-                // Ajouter le métier source
                 if (!metiersMap.has(codeSrc)) {
                     metiersMap.set(codeSrc, {
-                        codeOGR: codeSrc,
+                        codeROME: codeSrc,
                         libelle: libelleSrc,
-                        domaine: codeSrc[0]
+                        domaine: codeSrc[0],
+                        appellations: []
                     });
                 }
-                // Ajouter le métier cible
                 if (!metiersMap.has(codeTarget)) {
                     metiersMap.set(codeTarget, {
-                        codeOGR: codeTarget,
+                        codeROME: codeTarget,
                         libelle: libelleTarget,
-                        domaine: codeTarget[0]
+                        domaine: codeTarget[0],
+                        appellations: []
                     });
                 }
 
@@ -975,22 +963,15 @@
                     if (!formationMap.has(codeTarget)) formationMap.set(codeTarget, []);
                     formationMap.get(codeTarget).push(...codesFormTarget);
                 }
-
-                if (idx < 5) {
-                    console.log(`Objet ${idx} : codeSrc=${codeSrc}, codeTarget=${codeTarget}, codesSrc=${codesFormSrc.length}, codesTarget=${codesFormTarget.length}`);
-                }
             });
 
             romeData.metiers = Array.from(metiersMap.values());
-            romeData.fiches = new Set(romeData.metiers.map(m => m.codeOGR));
-            console.log('metiers trouvés :', romeData.metiers.length);
+            romeData.fiches = new Set(romeData.metiers.map(m => m.codeROME));
 
-            // Dédoublonner les codes formation
             formationMap.forEach((codes, code) => {
                 romeToFormation.set(code, [...new Set(codes)]);
             });
 
-            // Compter les métiers par domaine
             const domainCount = new Map();
             romeData.metiers.forEach(m => {
                 const d = m.domaine;
@@ -1003,6 +984,63 @@
                     count
                 });
             });
+        }
+
+        function processConverted3(data) {
+            const centreMap = new Map(); // libelle -> Set de codesRome
+            data.forEach(item => {
+                const codeRome = item.__EMPTY;
+                const centreLibelle = Object.keys(item).find(k => k !== '__EMPTY' && k !== 'Code OGR');
+                if (!codeRome || !centreLibelle) return;
+                if (!centreMap.has(centreLibelle)) {
+                    centreMap.set(centreLibelle, new Set());
+                }
+                centreMap.get(centreLibelle).add(codeRome);
+            });
+            romeData.centresInteret = Array.from(centreMap.entries()).map(([libelle, codesSet]) => ({
+                libelle,
+                codesRome: Array.from(codesSet)
+            }));
+            console.log('Centres d\'intérêt chargés:', romeData.centresInteret.length);
+        }
+
+        function processConverted4(data) {
+            // Construire un dictionnaire codeOGR -> { codeROME, libelle }
+            // et enrichir les métiers avec leurs appellations
+            const codeOGRToROME = new Map();
+            const appellationsParROME = new Map();
+
+            data.forEach(item => {
+                const domaine = item[" "]; // "A", "B", ...
+                const sousDomaine = item[" _1"]; // "11", "12", ...
+                const appellationCode = item[" _2"]; // "01", "02", ...
+                const libelleAppellation = item[" _3"];
+                const codeOGR = item["Code OGR"];
+
+                // Si on a un code OGR et un libellé, et que les codes hiérarchiques sont présents
+                if (codeOGR && libelleAppellation && domaine && sousDomaine && appellationCode) {
+                    const codeROME = domaine + sousDomaine + appellationCode; // ex: "A1101"
+                    codeOGRToROME.set(codeOGR, { codeROME, libelleAppellation });
+
+                    // Ajouter cette appellation au métier correspondant
+                    if (!appellationsParROME.has(codeROME)) {
+                        appellationsParROME.set(codeROME, []);
+                    }
+                    appellationsParROME.get(codeROME).push({ codeOGR, libelleAppellation });
+                }
+            });
+
+            // Enrichir les métiers existants avec leurs appellations
+            romeData.metiers.forEach(metier => {
+                const codeROME = metier.codeROME;
+                if (appellationsParROME.has(codeROME)) {
+                    metier.appellations = appellationsParROME.get(codeROME);
+                    // On peut prendre la première appellation comme libellé principal
+                    metier.libelle = metier.appellations[0].libelleAppellation;
+                }
+            });
+
+            console.log('Appellations chargées depuis converted4');
         }
 
         function processConverted2(data) {
@@ -1020,13 +1058,13 @@
 
         function loadFallbackData() {
             romeData.metiers = [
-                { codeOGR: 'M1805', libelle: 'Développeur informatique', domaine: 'M' },
-                { codeOGR: 'J1506', libelle: 'Infirmier', domaine: 'J' },
-                { codeOGR: 'D1405', libelle: 'Commercial', domaine: 'D' },
-                { codeOGR: 'M1607', libelle: 'Assistant administratif', domaine: 'M' },
-                { codeOGR: 'N4101', libelle: 'Conducteur routier', domaine: 'N' }
+                { codeROME: 'M1805', libelle: 'Développeur informatique', domaine: 'M', appellations: [] },
+                { codeROME: 'J1506', libelle: 'Infirmier', domaine: 'J', appellations: [] },
+                { codeROME: 'D1405', libelle: 'Commercial', domaine: 'D', appellations: [] },
+                { codeROME: 'M1607', libelle: 'Assistant administratif', domaine: 'M', appellations: [] },
+                { codeROME: 'N4101', libelle: 'Conducteur routier', domaine: 'N', appellations: [] }
             ];
-            romeData.fiches = new Set(romeData.metiers.map(m => m.codeOGR));
+            romeData.fiches = new Set(romeData.metiers.map(m => m.codeROME));
             romeData.domaines.set('A', { code: 'A', libelle: 'Agriculture', count: 0 });
             romeData.domaines.set('B', { code: 'B', libelle: 'Arts', count: 0 });
             romeData.domaines.set('C', { code: 'C', libelle: 'Banque', count: 0 });
@@ -1145,7 +1183,18 @@
                 document.getElementById('solutionsCard').classList.add('d-none');
             }
 
-            const metiersScore = romeData.metiers.map(m => {
+            let metiersCibles = romeData.metiers;
+
+            // Filtrer par centre d'intérêt si sélectionné
+            if (centre) {
+                const centreObj = romeData.centresInteret.find(c => c.libelle === centre);
+                if (centreObj && centreObj.codesRome.length) {
+                    const codesRomeSet = new Set(centreObj.codesRome);
+                    metiersCibles = metiersCibles.filter(m => codesRomeSet.has(m.codeROME));
+                }
+            }
+
+            const metiersScore = metiersCibles.map(m => {
                 let score = 0, max = 0;
                 if (secteur) {
                     max += 30;
@@ -1160,12 +1209,11 @@
                     if (s === 'communication' && m.libelle.toLowerCase().includes('commercial')) score += 5;
                     if (s === 'organisation' && m.libelle.toLowerCase().includes('assistant')) score += 5;
                 });
-                // centre d'intérêt : on a peu de données, on ignore
                 return { ...m, score: max ? Math.round((score/max)*100) : 0 };
             }).sort((a,b) => b.score - a.score).slice(0,10);
 
             displayMetiers(metiersScore);
-            const avg = Math.round(metiersScore.reduce((a,b)=>a+b.score,0)/metiersScore.length);
+            const avg = Math.round(metiersScore.reduce((a,b)=>a+b.score,0)/metiersScore.length) || 0;
             document.getElementById('avgScore').textContent = avg + '%';
             document.getElementById('resultsSection').classList.remove('d-none');
             document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
@@ -1175,7 +1223,7 @@
             const container = document.getElementById('metiersList');
             container.innerHTML = '';
             metiers.forEach(m => {
-                const codes = romeToFormation.get(m.codeOGR) || [];
+                const codes = romeToFormation.get(m.codeROME) || [];
                 let lien = '#';
                 if (codes.length) {
                     const params = codes.map(c => 'FORMACODE-' + c).join(',');
@@ -1187,7 +1235,8 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <h6 class="mb-1">${m.libelle}</h6>
-                            <small class="text-muted">Code: ${m.codeOGR} | Domaine: ${m.domaine}</small>
+                            <small class="text-muted">Code: ${m.codeROME} | Domaine: ${m.domaine}</small>
+                            ${m.appellations && m.appellations.length > 1 ? `<small class="d-block text-muted">+ ${m.appellations.length-1} autre(s) appellation(s)</small>` : ''}
                             <div class="mt-2">${codes.length ? `<a href="${lien}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-search me-1"></i>Voir les formations (${codes.length})</a>` : '<span class="text-muted">Aucune formation référencée</span>'}</div>
                         </div>
                         <span class="badge badge-primary fs-6">${m.score}%</span>
@@ -1247,6 +1296,6 @@
 
         initApp();
     })();
-</script>
+    </script>
 </body>
 </html>
