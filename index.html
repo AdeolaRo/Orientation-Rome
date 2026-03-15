@@ -7,6 +7,7 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* (Conservez l'intégralité du CSS inchangé) */
         :root {
             --primary: #0055a4;
             --primary-dark: #003f7f;
@@ -386,10 +387,10 @@
             display: inline-block;
             background: rgba(0,85,164,0.1);
             color: var(--primary);
-            padding: 0.25rem 0.75rem;  /* réduit */
+            padding: 0.25rem 0.75rem;
             border-radius: 50rem;
-            margin: 0.2rem;             /* réduit */
-            font-size: 0.85rem;          /* réduit */
+            margin: 0.2rem;
+            font-size: 0.85rem;
             border: 1px solid rgba(0,85,164,0.2);
             cursor: pointer;
             transition: var(--transition-base);
@@ -743,53 +744,315 @@
             <div class="card shadow-lg">
                 <div class="card-header bg-gradient-primary"><i class="fas fa-hands-helping me-2"></i>Aides Gouvernementales Officielles</div>
                 <div class="card-body">
-                    <ul class="nav-tabs" id="aidesTab">
-                        <li class="nav-item"><button class="nav-link active" onclick="switchTab('logement')">🏠 Logement</button></li>
-                        <li class="nav-item"><button class="nav-link" onclick="switchTab('enfant')">👶 Garde d'enfant</button></li>
-                        <li class="nav-item"><button class="nav-link" onclick="switchTab('sante')">🏥 Santé</button></li>
-                        <li class="nav-item"><button class="nav-link" onclick="switchTab('transport')">🚗 Transport</button></li>
-                        <li class="nav-item"><button class="nav-link" onclick="switchTab('formationAide')">📚 Formation</button></li>
-                        <li class="nav-item"><button class="nav-link" onclick="switchTab('juridique')">⚖️ Juridique</button></li>
+                    <ul class="nav nav-tabs" id="aidesTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" onclick="switchTab('logement')" type="button" role="tab">🏠 Logement</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" onclick="switchTab('enfant')" type="button" role="tab">👶 Garde d'enfant</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" onclick="switchTab('sante')" type="button" role="tab">🏥 Santé</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" onclick="switchTab('transport')" type="button" role="tab">🚗 Transport</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" onclick="switchTab('formationAide')" type="button" role="tab">📚 Formation</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" onclick="switchTab('juridique')" type="button" role="tab">⚖️ Juridique</button>
+                        </li>
                     </ul>
                     <div class="tab-content" id="aidesTabContent">
-                        <div class="tab-pane active" id="logement-content">
+                        <!-- Logement -->
+                        <div class="tab-pane fade show active" id="logement-content" role="tabpanel">
                             <div class="row">
-                                <div class="col-md-6"><div class="solution-card"><h6>Action Logement</h6><p>Aide à la mobilité, garantie Visale, avance Loca-Pass.</p></div></div>
-                                <div class="col-md-6"><div class="solution-card"><h6>APL / ALS</h6><p>Aides personnalisées au logement selon les ressources.</p></div></div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.actionlogement.fr" target="_blank" class="solution-link">
+                                        <i class="fas fa-home text-primary me-2"></i>
+                                        Action Logement
+                                        <small class="d-block text-muted">Aides à la mobilité et au logement</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.service-public.fr/particuliers/vosdroits/F12006" target="_blank" class="solution-link">
+                                        <i class="fas fa-euro-sign text-success me-2"></i>
+                                        APL (Service-Public.fr)
+                                        <small class="d-block text-muted">Aide personnalisée au logement</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.actionlogement.fr/visale" target="_blank" class="solution-link">
+                                        <i class="fas fa-shield-alt text-info me-2"></i>
+                                        Garantie Visale
+                                        <small class="d-block text-muted">Garantie locative gratuite</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.service-public.fr/particuliers/vosdroits/F1625" target="_blank" class="solution-link">
+                                        <i class="fas fa-hand-holding-heart text-warning me-2"></i>
+                                        FSL
+                                        <small class="d-block text-muted">Fonds Solidarité Logement</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.anil.org" target="_blank" class="solution-link">
+                                        <i class="fas fa-info-circle text-secondary me-2"></i>
+                                        ANIL
+                                        <small class="d-block text-muted">Agence nationale info logement</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.francetravail.fr/candidat/vos-droits-et-aides/aides-financieres/l-aide-a-la-mobilite.html" target="_blank" class="solution-link">
+                                        <i class="fas fa-car text-danger me-2"></i>
+                                        Aide mobilité France Travail
+                                        <small class="d-block text-muted">Pour les demandeurs d'emploi</small>
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                        <div class="tab-pane" id="enfant-content">
+
+                        <!-- Garde d'enfant -->
+                        <div class="tab-pane fade" id="enfant-content" role="tabpanel">
                             <div class="row">
-                                <div class="col-md-6"><div class="solution-card"><h6>CMG</h6><p>Complément de libre choix du mode de garde (PAJE).</p></div></div>
-                                <div class="col-md-6"><div class="solution-card"><h6>Crèches à horaires élargis</h6><p>Places réservées pour les parents en insertion.</p></div></div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.caf.fr/allocataires/aides-et-demarches/droits-et-prestations/vie-personnelle/le-complement-de-libre-choix-du-mode-de-garde-cmg" target="_blank" class="solution-link">
+                                        <i class="fas fa-baby text-primary me-2"></i>
+                                        CMG - CAF
+                                        <small class="d-block text-muted">Complément mode de garde</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.francetravail.fr/candidat/vos-droits-et-aides/aides-financieres/les-aides-financieres-en-faveur/l-aide-a-la-garde-d-enfant-pour.html" target="_blank" class="solution-link">
+                                        <i class="fas fa-baby-carriage text-success me-2"></i>
+                                        Aide garde enfant France Travail
+                                        <small class="d-block text-muted">Pour formations et entretiens</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.cesu.urssaf.fr" target="_blank" class="solution-link">
+                                        <i class="fas fa-credit-card text-info me-2"></i>
+                                        CESU
+                                        <small class="d-block text-muted">Chèque emploi service universel</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.mon-enfant.fr" target="_blank" class="solution-link">
+                                        <i class="fas fa-search text-warning me-2"></i>
+                                        Mon-enfant.fr
+                                        <small class="d-block text-muted">Recherche de modes de garde</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.pajemploi.urssaf.fr" target="_blank" class="solution-link">
+                                        <i class="fas fa-file-invoice text-secondary me-2"></i>
+                                        Pajemploi
+                                        <small class="d-block text-muted">Déclaration des salaires</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.service-public.fr/particuliers/vosdroits/F1450" target="_blank" class="solution-link">
+                                        <i class="fas fa-scale-balanced text-danger me-2"></i>
+                                        Réduction d'impôt
+                                        <small class="d-block text-muted">Pour frais de garde d'enfants</small>
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                        <div class="tab-pane" id="sante-content">
+
+                        <!-- Santé -->
+                        <div class="tab-pane fade" id="sante-content" role="tabpanel">
                             <div class="row">
-                                <div class="col-md-6"><div class="solution-card"><h6>CMU-C / ACS</h6><p>Couverture maladie universelle complémentaire.</p></div></div>
-                                <div class="col-md-6"><div class="solution-card"><h6>PASS</h6><p>Permanences d'accès aux soins de santé.</p></div></div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.ameli.fr" target="_blank" class="solution-link">
+                                        <i class="fas fa-heartbeat text-primary me-2"></i>
+                                        ameli.fr
+                                        <small class="d-block text-muted">Assurance Maladie</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.complementaire-sante-solidaire.gouv.fr" target="_blank" class="solution-link">
+                                        <i class="fas fa-plus-circle text-success me-2"></i>
+                                        Complémentaire santé solidaire
+                                        <small class="d-block text-muted">Ancienne CMU-C / ACS</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.service-public.fr/particuliers/vosdroits/F10007" target="_blank" class="solution-link">
+                                        <i class="fas fa-stethoscope text-info me-2"></i>
+                                        PASS
+                                        <small class="d-block text-muted">Permanence accès soins santé</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.sante.fr" target="_blank" class="solution-link">
+                                        <i class="fas fa-map-marked-alt text-warning me-2"></i>
+                                        Santé.fr
+                                        <small class="d-block text-muted">Annuaire des professionnels</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.francetravail.fr/candidat/vos-droits-et-aides/nous-vous-accompagnons/sante-travail.html" target="_blank" class="solution-link">
+                                        <i class="fas fa-briefcase text-secondary me-2"></i>
+                                        Santé travail France Travail
+                                        <small class="d-block text-muted">Accompagnement spécifique</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.mutualite.fr" target="_blank" class="solution-link">
+                                        <i class="fas fa-hand-holding-heart text-danger me-2"></i>
+                                        Mutualité Française
+                                        <small class="d-block text-muted">Infos sur les mutuelles</small>
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                        <div class="tab-pane" id="transport-content">
+
+                        <!-- Transport -->
+                        <div class="tab-pane fade" id="transport-content" role="tabpanel">
                             <div class="row">
-                                <div class="col-md-6"><div class="solution-card"><h6>Aide au permis</h6><p>Permis à 1€ par jour, aide France Travail.</p></div></div>
-                                <div class="col-md-6"><div class="solution-card"><h6>Forfait mobilités durables</h6><p>Prime pour l'utilisation de transports propres.</p></div></div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.francetravail.fr/candidat/vos-droits-et-aides/aides-financieres/les-aides-financieres-en-faveur/l-aide-au-permis-de-conduire.html" target="_blank" class="solution-link">
+                                        <i class="fas fa-id-card text-primary me-2"></i>
+                                        Permis à 1€ par jour
+                                        <small class="d-block text-muted">Aide au financement du permis</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.francetravail.fr/candidat/vos-droits-et-aides/aides-financieres/l-aide-a-la-mobilite.html" target="_blank" class="solution-link">
+                                        <i class="fas fa-car text-success me-2"></i>
+                                        Aide à la mobilité
+                                        <small class="d-block text-muted">Pour l'achat/réparation véhicule</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.service-public.fr/particuliers/vosdroits/F1430" target="_blank" class="solution-link">
+                                        <i class="fas fa-bicycle text-info me-2"></i>
+                                        Forfait mobilités durables
+                                        <small class="d-block text-muted">Indemnité vélo/covoiturage</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.iledefrance-mobilites.fr" target="_blank" class="solution-link">
+                                        <i class="fas fa-train text-warning me-2"></i>
+                                        Île-de-France Mobilités
+                                        <small class="d-block text-muted">Aides transport IDF</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.francetravail.fr/candidat/vos-droits-et-aides/aides-financieres/les-aides-financieres-en-faveur/l-aide-a-la-mobilite-internationale.html" target="_blank" class="solution-link">
+                                        <i class="fas fa-globe text-secondary me-2"></i>
+                                        Mobilité internationale
+                                        <small class="d-block text-muted">Aide pour projet à l'étranger</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.ecologie.gouv.fr/prime-conversion" target="_blank" class="solution-link">
+                                        <i class="fas fa-leaf text-danger me-2"></i>
+                                        Prime à la conversion
+                                        <small class="d-block text-muted">Pour véhicules propres</small>
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                        <div class="tab-pane" id="formationAide-content">
+
+                        <!-- Formation -->
+                        <div class="tab-pane fade" id="formationAide-content" role="tabpanel">
                             <div class="row">
-                                <div class="col-md-6"><div class="solution-card"><h6>CPF</h6><p>Compte personnel de formation, utilisable toute la vie.</p></div></div>
-                                <div class="col-md-6"><div class="solution-card"><h6>POEC / POEI</h6><p>Préparation opérationnelle à l'emploi collective/individuelle.</p></div></div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.moncompteformation.gouv.fr" target="_blank" class="solution-link">
+                                        <i class="fas fa-credit-card text-primary me-2"></i>
+                                        Mon Compte Formation
+                                        <small class="d-block text-muted">Gestion du CPF</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.francetravail.fr/candidat/en-formation/les-aides-financieres-de-pole-emploi/l-aide-individuelle-a-la-formation.html" target="_blank" class="solution-link">
+                                        <i class="fas fa-gift text-success me-2"></i>
+                                        AIF
+                                        <small class="d-block text-muted">Aide individuelle à la formation</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.francetravail.fr/candidat/en-formation/les-aides-financieres-de-pole-emploi/la-preparation-operationnelle-a-l.html" target="_blank" class="solution-link">
+                                        <i class="fas fa-briefcase text-info me-2"></i>
+                                        POEC/POEI
+                                        <small class="d-block text-muted">Préparation opérationnelle</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.francecompetences.fr" target="_blank" class="solution-link">
+                                        <i class="fas fa-certificate text-warning me-2"></i>
+                                        France Compétences
+                                        <small class="d-block text-muted">Référentiel certifications</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://travail-emploi.gouv.fr/formation-professionnelle" target="_blank" class="solution-link">
+                                        <i class="fas fa-gavel text-secondary me-2"></i>
+                                        Ministère du Travail
+                                        <small class="d-block text-muted">Politique de formation</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.choisirmonmetier-paysdelaloire.fr" target="_blank" class="solution-link">
+                                        <i class="fas fa-map text-danger me-2"></i>
+                                        Plateformes régionales
+                                        <small class="d-block text-muted">Aides selon votre région</small>
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                        <div class="tab-pane" id="juridique-content">
+
+                        <!-- Juridique -->
+                        <div class="tab-pane fade" id="juridique-content" role="tabpanel">
                             <div class="row">
-                                <div class="col-md-6"><div class="solution-card"><h6>Consultation gratuite avocat</h6><p>Permanences dans les maisons de justice.</p></div></div>
-                                <div class="col-md-6"><div class="solution-card"><h6>Aide juridictionnelle</h6><p>Prise en charge des frais de justice.</p></div></div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.justice.fr" target="_blank" class="solution-link">
+                                        <i class="fas fa-gavel text-primary me-2"></i>
+                                        justice.fr
+                                        <small class="d-block text-muted">Portail du ministère</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.defenseurdesdroits.fr" target="_blank" class="solution-link">
+                                        <i class="fas fa-shield text-success me-2"></i>
+                                        Défenseur des droits
+                                        <small class="d-block text-muted">Aide et médiation</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.service-public.fr/particuliers/vosdroits/F1807" target="_blank" class="solution-link">
+                                        <i class="fas fa-file-signature text-info me-2"></i>
+                                        Aide juridictionnelle
+                                        <small class="d-block text-muted">Prise en charge frais</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.cnaj.avocat.fr" target="_blank" class="solution-link">
+                                        <i class="fas fa-balance-scale text-warning me-2"></i>
+                                        Consultation avocat
+                                        <small class="d-block text-muted">Conseils juridiques</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://banque-france.fr" target="_blank" class="solution-link">
+                                        <i class="fas fa-coins text-secondary me-2"></i>
+                                        Banque de France
+                                        <small class="d-block text-muted">Surendettement</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <a href="https://www.francetravail.fr/candidat/vos-droits-et-aides/aides-financieres/les-aides-financieres-en-faveur/l-aide-a-la-reprise-ou-a-la-creation.html" target="_blank" class="solution-link">
+                                        <i class="fas fa-store text-danger me-2"></i>
+                                        Aide création entreprise
+                                        <small class="d-block text-muted">Accompagnement juridique</small>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="alert alert-warning mt-4"><i class="fas fa-exclamation-triangle me-2"></i><strong>Pour connaître vos droits précis :</strong> Contactez France Travail au 39 49 ou consultez votre conseiller.</div>
                 </div>
             </div>
         </section>
@@ -1191,24 +1454,42 @@
             container.innerHTML = '';
             metiers.forEach(m => {
                 const codes = romeToFormation.get(m.codeROME) || [];
-                let lien = '#';
+                let lienFormation = '#';
                 if (codes.length) {
                     const params = codes.map(c => 'FORMACODE-' + c).join(',');
-                    lien = `https://candidat.francetravail.fr/formations/recherche?filtreEstFormationEnCoursOuAVenir=formEnCours&quoi=${encodeURIComponent(params)}&range=0-9&tri=0`;
+                    lienFormation = `https://candidat.francetravail.fr/formations/recherche?filtreEstFormationEnCoursOuAVenir=formEnCours&quoi=${encodeURIComponent(params)}&range=0-9&tri=0`;
                 }
+
+                // Déterminer la liste des appellations à afficher
+                let appellationsList = [];
+                if (m.appellations && m.appellations.length > 0) {
+                    appellationsList = m.appellations.map(a => a.libelleAppellation);
+                } else {
+                    appellationsList = [m.libelle];
+                }
+
                 const item = document.createElement('div');
                 item.className = 'list-group-item list-group-item-action';
-                item.innerHTML = `
+                let html = `
                     <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h6 class="mb-1">${m.libelle}</h6>
+                        <div style="flex:1;">
                             <small class="text-muted">Code: ${m.codeROME} | Domaine: ${m.domaine}</small>
-                            ${m.appellations && m.appellations.length > 1 ? `<small class="d-block text-muted">+ ${m.appellations.length-1} autre(s) appellation(s)</small>` : ''}
-                            <div class="mt-2">${codes.length ? `<a href="${lien}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-search me-1"></i>Voir la formation</a>` : '<span class="text-muted">Aucune formation référencée</span>'}</div>
+                            <ul style="margin-top:0.5rem; padding-left:1.2rem;">
+                `;
+                appellationsList.forEach(libelle => {
+                    if (codes.length) {
+                        html += `<li><a href="${lienFormation}" target="_blank" class="text-decoration-none">${libelle}</a></li>`;
+                    } else {
+                        html += `<li>${libelle} <span class="text-muted">(aucune formation)</span></li>`;
+                    }
+                });
+                html += `
+                            </ul>
                         </div>
-                        <span class="badge badge-primary fs-6">${m.score}%</span>
+                        <span class="badge badge-primary fs-6" style="align-self:center;">${m.score}%</span>
                     </div>
                 `;
+                item.innerHTML = html;
                 container.appendChild(item);
             });
         }
@@ -1245,8 +1526,8 @@
         function switchTab(tabName) {
             document.querySelectorAll('#aidesTab .nav-link').forEach(t => t.classList.remove('active'));
             event.target.classList.add('active');
-            document.querySelectorAll('#aidesTabContent .tab-pane').forEach(p => p.classList.remove('active'));
-            document.getElementById(tabName + '-content').classList.add('active');
+            document.querySelectorAll('#aidesTabContent .tab-pane').forEach(p => p.classList.remove('show', 'active'));
+            document.getElementById(tabName + '-content').classList.add('show', 'active');
         }
 
         function showAlert(msg, type) {
