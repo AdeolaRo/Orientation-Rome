@@ -837,399 +837,416 @@
     </footer>
 
     <script>
-        (function() {
-            let romeData = {
-                metiers: [],          // { codeOGR, libelle, domaine }
-                fiches: new Set(),    // codes uniques des fiches
-                domaines: new Map(),  // Map domaine -> { code, libelle, count }
-                centresInteret: []    // centres d'intérêt (peupler si disponible)
-            };
-            let romeToFormation = new Map(); // Map codeOGR -> [codes formation]
+    (function() {
+        let romeData = {
+            metiers: [],          // { codeOGR, libelle, domaine }
+            fiches: new Set(),    // codes uniques des fiches
+            domaines: new Map(),  // Map domaine -> { code, libelle, count }
+            centresInteret: []    // centres d'intérêt (peupler si disponible)
+        };
+        let romeToFormation = new Map(); // Map codeOGR -> [codes formation]
 
-            const LOAD_TIMEOUT = 10000; // 10 secondes
+        const LOAD_TIMEOUT = 10000; // 10 secondes
 
-            async function initApp() {
-                const timeoutId = setTimeout(() => {
-                    console.warn('Timeout chargement, utilisation des données de secours');
-                    loadFallbackData();
-                    updateUI();
-                    showAlert('Chargement en mode dégradé (timeout)', 'warning');
-                }, LOAD_TIMEOUT);
+        async function initApp() {
+            const timeoutId = setTimeout(() => {
+                console.warn('Timeout chargement, utilisation des données de secours');
+                loadFallbackData();
+                updateUI();
+                showAlert('Chargement en mode dégradé (timeout)', 'warning');
+            }, LOAD_TIMEOUT);
 
-                try {
-                    // Charger les 5 fichiers JSON
-                    const [resp1, resp2, resp3, resp4, resp5] = await Promise.all([
-                        fetch('data/converted1.json').catch(err => { console.error('Erreur converted1:', err); return null; }),
-                        fetch('data/converted2.json').catch(err => { console.error('Erreur converted2:', err); return null; }),
-                        fetch('data/converted3.json').catch(err => { console.error('Erreur converted3:', err); return null; }),
-                        fetch('data/converted4.json').catch(err => { console.error('Erreur converted4:', err); return null; }),
-                        fetch('data/converted5.json').catch(err => { console.error('Erreur converted5:', err); return null; })
-                    ]);
+            try {
+                // Charger les 5 fichiers JSON
+                const [resp1, resp2, resp3, resp4, resp5] = await Promise.all([
+                    fetch('data/converted1.json').catch(err => { console.error('Erreur converted1:', err); return null; }),
+                    fetch('data/converted2.json').catch(err => { console.error('Erreur converted2:', err); return null; }),
+                    fetch('data/converted3.json').catch(err => { console.error('Erreur converted3:', err); return null; }),
+                    fetch('data/converted4.json').catch(err => { console.error('Erreur converted4:', err); return null; }),
+                    fetch('data/converted5.json').catch(err => { console.error('Erreur converted5:', err); return null; })
+                ]);
 
-                    // Vérifier que converted5.json est chargé
-                    if (!resp5 || !resp5.ok) {
-                        throw new Error('Fichier converted5.json manquant ou inaccessible');
-                    }
-
-                    const data5 = await resp5.json();
-                    processConverted5(data5);
-
-                    // Vérifier que des métiers ont bien été extraits
-                    if (romeData.metiers.length === 0) {
-                        throw new Error('Aucun métier trouvé dans converted5.json');
-                    }
-
-                    if (resp2 && resp2.ok) {
-                        const data2 = await resp2.json();
-                        processConverted2(data2);
-                    }
-
-                    clearTimeout(timeoutId);
-                    // Pas d'alerte de succès
-                    updateUI();
-                } catch (err) {
-                    clearTimeout(timeoutId);
-                    console.error('Erreur chargement', err);
-                    loadFallbackData();
-                    updateUI();
-                    showAlert('Erreur de chargement - mode dégradé', 'danger');
-                }
-                setupNavigation();
-                setupEvents();
-                document.getElementById('updateDate').textContent = new Date().toLocaleDateString('fr-FR');
-            }
-
-            function processConverted5(data) {
-                console.log('processConverted5: nombre d\'objets', data.length);
-                const metiersMap = new Map();
-                const formationMap = new Map();
-
-                data.forEach((item, idx) => {
-                    const keys = Object.keys(item);
-                    // Chercher les clés qui ressemblent à des codes ROME
-                    const codeKeys = keys.filter(k => /^[A-Z]\d{4}$/.test(k));
-                    if (codeKeys.length < 2) {
-                        console.log(`Objet ${idx} : pas assez de codes ROME (${codeKeys.length})`, item);
-                        return;
-                    }
-                    const code1 = codeKeys[0];
-                    const code2 = codeKeys[1];
-                    const libelle1 = item[code1];
-                    const libelle2 = item[code2];
-                    console.log(`Objet ${idx} : codes trouvés ${code1} (${libelle1}) et ${code2} (${libelle2})`);
-
-                    // Chercher les clés qui contiennent des codes formation (celles avec des '$')
-                    const listKeys = keys.filter(k => item[k] && typeof item[k] === 'string' && item[k].includes('$'));
-                    const list1 = listKeys[0] ? item[listKeys[0]] : '';
-                    const list2 = listKeys[1] ? item[listKeys[1]] : '';
-                    console.log(`  listes : ${listKeys[0]}=${list1.substring(0,50)}... , ${listKeys[1]}=${list2.substring(0,50)}...`);
-
-                    const extractCodes = (str) => {
-                        if (!str) return [];
-                        return str.split('$')
-                            .map(part => {
-                                const trimmed = part.trim();
-                                const parts = trimmed.split(' ');
-                                const code = parts[parts.length-1];
-                                return code;
-                            })
-                            .filter(c => /^\d+$/.test(c));
-                    };
-
-                    const codesForm1 = extractCodes(list1);
-                    const codesForm2 = extractCodes(list2);
-
-                    if (!metiersMap.has(code1)) {
-                        metiersMap.set(code1, {
-                            codeOGR: code1,
-                            libelle: libelle1,
-                            domaine: code1[0]
-                        });
-                    }
-                    if (!metiersMap.has(code2)) {
-                        metiersMap.set(code2, {
-                            codeOGR: code2,
-                            libelle: libelle2,
-                            domaine: code2[0]
-                        });
-                    }
-
-                    if (codesForm1.length) {
-                        if (!formationMap.has(code1)) formationMap.set(code1, []);
-                        formationMap.get(code1).push(...codesForm1);
-                    }
-                    if (codesForm2.length) {
-                        if (!formationMap.has(code2)) formationMap.set(code2, []);
-                        formationMap.get(code2).push(...codesForm2);
-                    }
-                });
-
-                romeData.metiers = Array.from(metiersMap.values());
-                romeData.fiches = new Set(romeData.metiers.map(m => m.codeOGR));
-                console.log('metiers trouvés :', romeData.metiers.length);
-
-                // Dédoublonner les codes formation
-                formationMap.forEach((codes, code) => {
-                    romeToFormation.set(code, [...new Set(codes)]);
-                });
-
-                // Compter les métiers par domaine
-                const domainCount = new Map();
-                romeData.metiers.forEach(m => {
-                    const d = m.domaine;
-                    domainCount.set(d, (domainCount.get(d) || 0) + 1);
-                });
-                domainCount.forEach((count, code) => {
-                    romeData.domaines.set(code, {
-                        code,
-                        libelle: `Domaine ${code}`,
-                        count
-                    });
-                });
-            }
-
-            function processConverted2(data) {
-                // Améliorer les libellés des domaines
-                data.forEach(item => {
-                    if (item.GRD === 'GRD' && item.A0) {
-                        const code = item.A0;
-                        const libelle = item["DEVELOPPEMENT DES COMPETENCES"];
-                        if (code && libelle && romeData.domaines.has(code)) {
-                            romeData.domaines.get(code).libelle = libelle;
-                        }
-                    }
-                });
-            }
-
-            function loadFallbackData() {
-                romeData.metiers = [
-                    { codeOGR: 'M1805', libelle: 'Développeur informatique', domaine: 'M' },
-                    { codeOGR: 'J1506', libelle: 'Infirmier', domaine: 'J' },
-                    { codeOGR: 'D1405', libelle: 'Commercial', domaine: 'D' },
-                    { codeOGR: 'M1607', libelle: 'Assistant administratif', domaine: 'M' },
-                    { codeOGR: 'N4101', libelle: 'Conducteur routier', domaine: 'N' }
-                ];
-                romeData.fiches = new Set(romeData.metiers.map(m => m.codeOGR));
-                romeData.domaines.set('A', { code: 'A', libelle: 'Agriculture', count: 0 });
-                romeData.domaines.set('B', { code: 'B', libelle: 'Arts', count: 0 });
-                romeData.domaines.set('C', { code: 'C', libelle: 'Banque', count: 0 });
-                romeData.domaines.set('D', { code: 'D', libelle: 'Commerce', count: 1 });
-                romeData.domaines.set('J', { code: 'J', libelle: 'Santé', count: 1 });
-                romeData.domaines.set('M', { code: 'M', libelle: 'Support entreprise', count: 2 });
-                romeData.domaines.set('N', { code: 'N', libelle: 'Transport', count: 1 });
-                romeData.centresInteret = [
-                    { libelle: 'J\'aime être au contact de la nature', codesRome: ['A1206'] },
-                    { libelle: 'J\'ai le sens des affaires', codesRome: ['C1101'] }
-                ];
-                romeToFormation.set('M1805', ['31067']);
-                romeToFormation.set('J1506', ['43448']);
-                romeToFormation.set('D1405', ['34573']);
-                romeToFormation.set('M1607', ['35054']);
-                romeToFormation.set('N4101', ['31816']);
-            }
-
-            function updateUI() {
-                document.getElementById('metiersCount').textContent = romeData.metiers.length + ' métiers';
-                document.getElementById('domainesCount').textContent = romeData.domaines.size + ' domaines';
-                document.getElementById('fichesCount').textContent = romeData.fiches.size + ' fiches';
-                document.getElementById('statMetiers').textContent = romeData.metiers.length;
-                document.getElementById('statFiches').textContent = romeData.fiches.size;
-                document.getElementById('statDomaines').textContent = romeData.domaines.size;
-                document.getElementById('statCentres').textContent = romeData.centresInteret.length;
-                document.getElementById('statsMetiers').textContent = romeData.metiers.length;
-
-                const domList = document.getElementById('domainesList');
-                if (domList) {
-                    domList.innerHTML = '';
-                    romeData.domaines.forEach((d, code) => {
-                        domList.innerHTML += `<li class="mb-2"><span class="badge badge-primary me-2">${code}</span> ${d.libelle} (${d.count} métiers)</li>`;
-                    });
+                // Vérifier que converted5.json est chargé
+                if (!resp5 || !resp5.ok) {
+                    throw new Error('Fichier converted5.json manquant ou inaccessible');
                 }
 
-                const centreSelect = document.getElementById('centreInteret');
-                if (centreSelect) {
-                    centreSelect.innerHTML = '<option value="">Choisissez un centre d\'intérêt</option>';
-                    romeData.centresInteret.forEach(c => {
-                        const opt = document.createElement('option');
-                        opt.value = c.libelle;
-                        opt.textContent = c.libelle;
-                        centreSelect.appendChild(opt);
-                    });
+                const data5 = await resp5.json();
+                processConverted5(data5);
+
+                // Vérifier que des métiers ont bien été extraits
+                if (romeData.metiers.length === 0) {
+                    throw new Error('Aucun métier trouvé dans converted5.json');
                 }
 
-                const statList = document.getElementById('domainesStatList');
-                if (statList) {
-                    statList.innerHTML = '';
-                    romeData.domaines.forEach((d, code) => {
-                        statList.innerHTML += `<li class="list-group-item d-flex justify-content-between"><span><strong>${code}</strong> - ${d.libelle}</span><span class="badge badge-primary">${d.count}</span></li>`;
-                    });
+                if (resp2 && resp2.ok) {
+                    const data2 = await resp2.json();
+                    processConverted2(data2);
                 }
 
-                const topList = document.getElementById('topDomainesList');
-                if (topList) {
-                    topList.innerHTML = '';
-                    const sorted = Array.from(romeData.domaines.entries()).sort((a,b) => b[1].count - a[1].count).slice(0,5);
-                    sorted.forEach(([code, d]) => {
-                        topList.innerHTML += `<li class="list-group-item d-flex justify-content-between align-items-center">Domaine ${code} <span class="badge badge-primary rounded-pill">${d.count}</span></li>`;
-                    });
+                clearTimeout(timeoutId);
+                // Pas d'alerte de succès
+                updateUI();
+            } catch (err) {
+                clearTimeout(timeoutId);
+                console.error('Erreur chargement', err);
+                loadFallbackData();
+                updateUI();
+                showAlert('Erreur de chargement - mode dégradé', 'danger');
+            }
+            setupNavigation();
+            setupEvents();
+            document.getElementById('updateDate').textContent = new Date().toLocaleDateString('fr-FR');
+        }
+
+        function processConverted5(data) {
+            console.log('processConverted5: nombre d\'objets', data.length);
+            const metiersMap = new Map();
+            const formationMap = new Map();
+
+            data.forEach((item, idx) => {
+                const keys = Object.keys(item);
+                // Trouver la clé qui est un code ROME (ex: "A1101")
+                const codeSrcKey = keys.find(k => /^[A-Z]\d{4}$/.test(k));
+                if (!codeSrcKey) {
+                    console.log(`Objet ${idx} : pas de code ROME en clé, ignoré`);
+                    return;
                 }
-            }
-
-            function setupNavigation() {
-                const links = document.querySelectorAll('.nav-link[data-section]');
-                const sections = document.querySelectorAll('.section');
-                links.forEach(l => {
-                    l.addEventListener('click', e => {
-                        e.preventDefault();
-                        links.forEach(lk => lk.classList.remove('active'));
-                        l.classList.add('active');
-                        sections.forEach(s => s.classList.remove('active'));
-                        document.getElementById(l.dataset.section).classList.add('active');
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    });
-                });
-                document.querySelector('.orientation-btn')?.addEventListener('click', () => {
-                    links.forEach(l => l.classList.remove('active'));
-                    document.querySelector('[data-section="orientation"]').classList.add('active');
-                    sections.forEach(s => s.classList.remove('active'));
-                    document.getElementById('orientation').classList.add('active');
-                });
-            }
-
-            function setupEvents() {
-                document.querySelectorAll('.competence-tag').forEach(t => {
-                    t.addEventListener('click', function() {
-                        this.classList.toggle('selected');
-                        updateCompetences();
-                    });
-                });
-                document.getElementById('profileForm').addEventListener('submit', e => {
-                    e.preventDefault();
-                    analyzeProfile();
-                });
-            }
-
-            function updateCompetences() {
-                document.getElementById('competences').value = Array.from(document.querySelectorAll('#competencesContainer .competence-tag.selected')).map(t => t.dataset.value).join(',');
-                document.getElementById('softSkills').value = Array.from(document.querySelectorAll('#softSkillsContainer .competence-tag.selected')).map(t => t.dataset.value).join(',');
-            }
-
-            function analyzeProfile() {
-                const secteur = document.getElementById('secteur').value;
-                const centre = document.getElementById('centreInteret').value;
-                const competences = document.getElementById('competences').value.split(',').filter(c => c);
-                const softSkills = document.getElementById('softSkills').value.split(',').filter(s => s);
-                const difficulties = ['logement','garde_enfant','sante','transport','formation'].filter(id => document.getElementById(id)?.checked);
-
-                if (difficulties.length) {
-                    displaySolutions(difficulties);
-                    document.getElementById('solutionsCard').classList.remove('d-none');
-                } else {
-                    document.getElementById('solutionsCard').classList.add('d-none');
+                const codeSrc = codeSrcKey;
+                const codeTarget = item[codeSrcKey];
+                if (!codeTarget || !/^[A-Z]\d{4}$/.test(codeTarget)) {
+                    console.log(`Objet ${idx} : code cible invalide (${codeTarget}), ignoré`);
+                    return;
                 }
 
-                const metiersScore = romeData.metiers.map(m => {
-                    let score = 0, max = 0;
-                    if (secteur) {
-                        max += 30;
-                        if (m.libelle.toLowerCase().includes(secteur) || (m.domaine && m.domaine.toLowerCase() === secteur[0])) score += 30;
-                    }
-                    competences.forEach(c => {
-                        max += 10;
-                        if (m.libelle.toLowerCase().includes(c)) score += 10;
-                    });
-                    softSkills.forEach(s => {
-                        max += 5;
-                        if (s === 'communication' && m.libelle.toLowerCase().includes('commercial')) score += 5;
-                        if (s === 'organisation' && m.libelle.toLowerCase().includes('assistant')) score += 5;
-                    });
-                    // centre d'intérêt : on a peu de données, on ignore
-                    return { ...m, score: max ? Math.round((score/max)*100) : 0 };
-                }).sort((a,b) => b.score - a.score).slice(0,10);
+                // Trouver la clé longue qui contient des '$' (liste des codes formation)
+                const longKey = keys.find(k => item[k] && typeof item[k] === 'string' && item[k].includes('$'));
+                if (!longKey) {
+                    console.log(`Objet ${idx} : pas de liste de codes formation, ignoré`);
+                    return;
+                }
 
-                displayMetiers(metiersScore);
-                const avg = Math.round(metiersScore.reduce((a,b)=>a+b.score,0)/metiersScore.length);
-                document.getElementById('avgScore').textContent = avg + '%';
-                document.getElementById('resultsSection').classList.remove('d-none');
-                document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
-            }
+                // La clé longue contient la liste des codes pour la source
+                const listSrc = longKey; // c'est la chaîne avec les codes pour la source
+                const listTarget = item[longKey]; // c'est la chaîne avec les codes pour la cible
 
-            function displayMetiers(metiers) {
-                const container = document.getElementById('metiersList');
-                container.innerHTML = '';
-                metiers.forEach(m => {
-                    const codes = romeToFormation.get(m.codeOGR) || [];
-                    let lien = '#';
-                    if (codes.length) {
-                        const params = codes.map(c => 'FORMACODE-' + c).join(',');
-                        lien = `https://candidat.francetravail.fr/formations/recherche?filtreEstFormationEnCoursOuAVenir=formEnCours&quoi=${encodeURIComponent(params)}&range=0-9&tri=0`;
-                    }
-                    const item = document.createElement('div');
-                    item.className = 'list-group-item list-group-item-action';
-                    item.innerHTML = `
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h6 class="mb-1">${m.libelle}</h6>
-                                <small class="text-muted">Code: ${m.codeOGR} | Domaine: ${m.domaine}</small>
-                                <div class="mt-2">${codes.length ? `<a href="${lien}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-search me-1"></i>Voir les formations (${codes.length})</a>` : '<span class="text-muted">Aucune formation référencée</span>'}</div>
-                            </div>
-                            <span class="badge badge-primary fs-6">${m.score}%</span>
-                        </div>
-                    `;
-                    container.appendChild(item);
-                });
-            }
-
-            function displaySolutions(diff) {
-                const solutions = {
-                    logement: ['Action Logement : Aide à la mobilité', 'APL', 'Garantie Visale'],
-                    garde_enfant: ['CMG', 'Crèches places d\'urgence', 'Aide garde enfant'],
-                    sante: ['CMU-C', 'ACS', 'Consultations PASS'],
-                    transport: ['Aide à l\'achat véhicule', 'Forfait mobilités durables', 'Permis à 1€'],
-                    formation: ['CPF', 'POEC', 'AIF']
+                const extractCodes = (str) => {
+                    if (!str) return [];
+                    return str.split('$')
+                        .map(part => {
+                            const trimmed = part.trim();
+                            const parts = trimmed.split(' ');
+                            const code = parts[parts.length-1];
+                            return code;
+                        })
+                        .filter(c => /^\d+$/.test(c));
                 };
-                const container = document.getElementById('solutionsContainer');
-                container.innerHTML = '';
-                diff.forEach(d => {
-                    if (solutions[d]) {
-                        const col = document.createElement('div');
-                        col.className = 'col-md-6 mb-3';
-                        col.innerHTML = `<div class="solution-card"><h6>${getLabel(d)}</h6><ul class="mb-0">${solutions[d].map(s => `<li><small>${s}</small></li>`).join('')}</ul></div>`;
-                        container.appendChild(col);
+
+                const codesFormSrc = extractCodes(listSrc);
+                const codesFormTarget = extractCodes(listTarget);
+
+                // Libellés : on prend le premier champ texte (celui après le code source) comme libellé source
+                const libelleSrc = item[keys.find(k => typeof item[k] === 'string' && !k.match(/^[A-Z]\d{4}$/) && !item[k].includes('$'))] || '?';
+                // Pour le libellé cible, on n'a pas d'information directe, on utilise le code lui-même
+                const libelleTarget = codeTarget;
+
+                // Ajouter le métier source
+                if (!metiersMap.has(codeSrc)) {
+                    metiersMap.set(codeSrc, {
+                        codeOGR: codeSrc,
+                        libelle: libelleSrc,
+                        domaine: codeSrc[0]
+                    });
+                }
+                // Ajouter le métier cible
+                if (!metiersMap.has(codeTarget)) {
+                    metiersMap.set(codeTarget, {
+                        codeOGR: codeTarget,
+                        libelle: libelleTarget,
+                        domaine: codeTarget[0]
+                    });
+                }
+
+                if (codesFormSrc.length) {
+                    if (!formationMap.has(codeSrc)) formationMap.set(codeSrc, []);
+                    formationMap.get(codeSrc).push(...codesFormSrc);
+                }
+                if (codesFormTarget.length) {
+                    if (!formationMap.has(codeTarget)) formationMap.set(codeTarget, []);
+                    formationMap.get(codeTarget).push(...codesFormTarget);
+                }
+
+                if (idx < 5) {
+                    console.log(`Objet ${idx} : codeSrc=${codeSrc}, codeTarget=${codeTarget}, codesSrc=${codesFormSrc.length}, codesTarget=${codesFormTarget.length}`);
+                }
+            });
+
+            romeData.metiers = Array.from(metiersMap.values());
+            romeData.fiches = new Set(romeData.metiers.map(m => m.codeOGR));
+            console.log('metiers trouvés :', romeData.metiers.length);
+
+            // Dédoublonner les codes formation
+            formationMap.forEach((codes, code) => {
+                romeToFormation.set(code, [...new Set(codes)]);
+            });
+
+            // Compter les métiers par domaine
+            const domainCount = new Map();
+            romeData.metiers.forEach(m => {
+                const d = m.domaine;
+                domainCount.set(d, (domainCount.get(d) || 0) + 1);
+            });
+            domainCount.forEach((count, code) => {
+                romeData.domaines.set(code, {
+                    code,
+                    libelle: `Domaine ${code}`,
+                    count
+                });
+            });
+        }
+
+        function processConverted2(data) {
+            // Améliorer les libellés des domaines
+            data.forEach(item => {
+                if (item.GRD === 'GRD' && item.A0) {
+                    const code = item.A0;
+                    const libelle = item["DEVELOPPEMENT DES COMPETENCES"];
+                    if (code && libelle && romeData.domaines.has(code)) {
+                        romeData.domaines.get(code).libelle = libelle;
                     }
+                }
+            });
+        }
+
+        function loadFallbackData() {
+            romeData.metiers = [
+                { codeOGR: 'M1805', libelle: 'Développeur informatique', domaine: 'M' },
+                { codeOGR: 'J1506', libelle: 'Infirmier', domaine: 'J' },
+                { codeOGR: 'D1405', libelle: 'Commercial', domaine: 'D' },
+                { codeOGR: 'M1607', libelle: 'Assistant administratif', domaine: 'M' },
+                { codeOGR: 'N4101', libelle: 'Conducteur routier', domaine: 'N' }
+            ];
+            romeData.fiches = new Set(romeData.metiers.map(m => m.codeOGR));
+            romeData.domaines.set('A', { code: 'A', libelle: 'Agriculture', count: 0 });
+            romeData.domaines.set('B', { code: 'B', libelle: 'Arts', count: 0 });
+            romeData.domaines.set('C', { code: 'C', libelle: 'Banque', count: 0 });
+            romeData.domaines.set('D', { code: 'D', libelle: 'Commerce', count: 1 });
+            romeData.domaines.set('J', { code: 'J', libelle: 'Santé', count: 1 });
+            romeData.domaines.set('M', { code: 'M', libelle: 'Support entreprise', count: 2 });
+            romeData.domaines.set('N', { code: 'N', libelle: 'Transport', count: 1 });
+            romeData.centresInteret = [
+                { libelle: 'J\'aime être au contact de la nature', codesRome: ['A1206'] },
+                { libelle: 'J\'ai le sens des affaires', codesRome: ['C1101'] }
+            ];
+            romeToFormation.set('M1805', ['31067']);
+            romeToFormation.set('J1506', ['43448']);
+            romeToFormation.set('D1405', ['34573']);
+            romeToFormation.set('M1607', ['35054']);
+            romeToFormation.set('N4101', ['31816']);
+        }
+
+        function updateUI() {
+            document.getElementById('metiersCount').textContent = romeData.metiers.length + ' métiers';
+            document.getElementById('domainesCount').textContent = romeData.domaines.size + ' domaines';
+            document.getElementById('fichesCount').textContent = romeData.fiches.size + ' fiches';
+            document.getElementById('statMetiers').textContent = romeData.metiers.length;
+            document.getElementById('statFiches').textContent = romeData.fiches.size;
+            document.getElementById('statDomaines').textContent = romeData.domaines.size;
+            document.getElementById('statCentres').textContent = romeData.centresInteret.length;
+            document.getElementById('statsMetiers').textContent = romeData.metiers.length;
+
+            const domList = document.getElementById('domainesList');
+            if (domList) {
+                domList.innerHTML = '';
+                romeData.domaines.forEach((d, code) => {
+                    domList.innerHTML += `<li class="mb-2"><span class="badge badge-primary me-2">${code}</span> ${d.libelle} (${d.count} métiers)</li>`;
                 });
             }
 
-            function getLabel(k) {
-                const labels = { logement:'🏠 Logement', garde_enfant:'👶 Garde d\'enfant', sante:'🏥 Santé', transport:'🚗 Transport', formation:'📚 Formation' };
-                return labels[k] || k;
+            const centreSelect = document.getElementById('centreInteret');
+            if (centreSelect) {
+                centreSelect.innerHTML = '<option value="">Choisissez un centre d\'intérêt</option>';
+                romeData.centresInteret.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.libelle;
+                    opt.textContent = c.libelle;
+                    centreSelect.appendChild(opt);
+                });
             }
 
-            function toggleNavbar() {
-                document.getElementById('navbarNav').classList.toggle('show');
+            const statList = document.getElementById('domainesStatList');
+            if (statList) {
+                statList.innerHTML = '';
+                romeData.domaines.forEach((d, code) => {
+                    statList.innerHTML += `<li class="list-group-item d-flex justify-content-between"><span><strong>${code}</strong> - ${d.libelle}</span><span class="badge badge-primary">${d.count}</span></li>`;
+                });
             }
 
-            function switchTab(tabName) {
-                document.querySelectorAll('#aidesTab .nav-link').forEach(t => t.classList.remove('active'));
-                event.target.classList.add('active');
-                document.querySelectorAll('#aidesTabContent .tab-pane').forEach(p => p.classList.remove('active'));
-                document.getElementById(tabName + '-content').classList.add('active');
+            const topList = document.getElementById('topDomainesList');
+            if (topList) {
+                topList.innerHTML = '';
+                const sorted = Array.from(romeData.domaines.entries()).sort((a,b) => b[1].count - a[1].count).slice(0,5);
+                sorted.forEach(([code, d]) => {
+                    topList.innerHTML += `<li class="list-group-item d-flex justify-content-between align-items-center">Domaine ${code} <span class="badge badge-primary rounded-pill">${d.count}</span></li>`;
+                });
+            }
+        }
+
+        function setupNavigation() {
+            const links = document.querySelectorAll('.nav-link[data-section]');
+            const sections = document.querySelectorAll('.section');
+            links.forEach(l => {
+                l.addEventListener('click', e => {
+                    e.preventDefault();
+                    links.forEach(lk => lk.classList.remove('active'));
+                    l.classList.add('active');
+                    sections.forEach(s => s.classList.remove('active'));
+                    document.getElementById(l.dataset.section).classList.add('active');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            });
+            document.querySelector('.orientation-btn')?.addEventListener('click', () => {
+                links.forEach(l => l.classList.remove('active'));
+                document.querySelector('[data-section="orientation"]').classList.add('active');
+                sections.forEach(s => s.classList.remove('active'));
+                document.getElementById('orientation').classList.add('active');
+            });
+        }
+
+        function setupEvents() {
+            document.querySelectorAll('.competence-tag').forEach(t => {
+                t.addEventListener('click', function() {
+                    this.classList.toggle('selected');
+                    updateCompetences();
+                });
+            });
+            document.getElementById('profileForm').addEventListener('submit', e => {
+                e.preventDefault();
+                analyzeProfile();
+            });
+        }
+
+        function updateCompetences() {
+            document.getElementById('competences').value = Array.from(document.querySelectorAll('#competencesContainer .competence-tag.selected')).map(t => t.dataset.value).join(',');
+            document.getElementById('softSkills').value = Array.from(document.querySelectorAll('#softSkillsContainer .competence-tag.selected')).map(t => t.dataset.value).join(',');
+        }
+
+        function analyzeProfile() {
+            const secteur = document.getElementById('secteur').value;
+            const centre = document.getElementById('centreInteret').value;
+            const competences = document.getElementById('competences').value.split(',').filter(c => c);
+            const softSkills = document.getElementById('softSkills').value.split(',').filter(s => s);
+            const difficulties = ['logement','garde_enfant','sante','transport','formation'].filter(id => document.getElementById(id)?.checked);
+
+            if (difficulties.length) {
+                displaySolutions(difficulties);
+                document.getElementById('solutionsCard').classList.remove('d-none');
+            } else {
+                document.getElementById('solutionsCard').classList.add('d-none');
             }
 
-            function showAlert(msg, type) {
-                const a = document.createElement('div');
-                a.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3`;
-                a.style.zIndex = '9999';
-                a.innerHTML = msg + '<button type="button" class="btn-close" onclick="this.parentElement.remove()">×</button>';
-                document.body.appendChild(a);
-                setTimeout(() => a.remove(), 5000);
-            }
+            const metiersScore = romeData.metiers.map(m => {
+                let score = 0, max = 0;
+                if (secteur) {
+                    max += 30;
+                    if (m.libelle.toLowerCase().includes(secteur) || (m.domaine && m.domaine.toLowerCase() === secteur[0])) score += 30;
+                }
+                competences.forEach(c => {
+                    max += 10;
+                    if (m.libelle.toLowerCase().includes(c)) score += 10;
+                });
+                softSkills.forEach(s => {
+                    max += 5;
+                    if (s === 'communication' && m.libelle.toLowerCase().includes('commercial')) score += 5;
+                    if (s === 'organisation' && m.libelle.toLowerCase().includes('assistant')) score += 5;
+                });
+                // centre d'intérêt : on a peu de données, on ignore
+                return { ...m, score: max ? Math.round((score/max)*100) : 0 };
+            }).sort((a,b) => b.score - a.score).slice(0,10);
 
-            window.toggleNavbar = toggleNavbar;
-            window.switchTab = switchTab;
+            displayMetiers(metiersScore);
+            const avg = Math.round(metiersScore.reduce((a,b)=>a+b.score,0)/metiersScore.length);
+            document.getElementById('avgScore').textContent = avg + '%';
+            document.getElementById('resultsSection').classList.remove('d-none');
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        }
 
-            initApp();
-        })();
-    </script>
+        function displayMetiers(metiers) {
+            const container = document.getElementById('metiersList');
+            container.innerHTML = '';
+            metiers.forEach(m => {
+                const codes = romeToFormation.get(m.codeOGR) || [];
+                let lien = '#';
+                if (codes.length) {
+                    const params = codes.map(c => 'FORMACODE-' + c).join(',');
+                    lien = `https://candidat.francetravail.fr/formations/recherche?filtreEstFormationEnCoursOuAVenir=formEnCours&quoi=${encodeURIComponent(params)}&range=0-9&tri=0`;
+                }
+                const item = document.createElement('div');
+                item.className = 'list-group-item list-group-item-action';
+                item.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1">${m.libelle}</h6>
+                            <small class="text-muted">Code: ${m.codeOGR} | Domaine: ${m.domaine}</small>
+                            <div class="mt-2">${codes.length ? `<a href="${lien}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-search me-1"></i>Voir les formations (${codes.length})</a>` : '<span class="text-muted">Aucune formation référencée</span>'}</div>
+                        </div>
+                        <span class="badge badge-primary fs-6">${m.score}%</span>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function displaySolutions(diff) {
+            const solutions = {
+                logement: ['Action Logement : Aide à la mobilité', 'APL', 'Garantie Visale'],
+                garde_enfant: ['CMG', 'Crèches places d\'urgence', 'Aide garde enfant'],
+                sante: ['CMU-C', 'ACS', 'Consultations PASS'],
+                transport: ['Aide à l\'achat véhicule', 'Forfait mobilités durables', 'Permis à 1€'],
+                formation: ['CPF', 'POEC', 'AIF']
+            };
+            const container = document.getElementById('solutionsContainer');
+            container.innerHTML = '';
+            diff.forEach(d => {
+                if (solutions[d]) {
+                    const col = document.createElement('div');
+                    col.className = 'col-md-6 mb-3';
+                    col.innerHTML = `<div class="solution-card"><h6>${getLabel(d)}</h6><ul class="mb-0">${solutions[d].map(s => `<li><small>${s}</small></li>`).join('')}</ul></div>`;
+                    container.appendChild(col);
+                }
+            });
+        }
+
+        function getLabel(k) {
+            const labels = { logement:'🏠 Logement', garde_enfant:'👶 Garde d\'enfant', sante:'🏥 Santé', transport:'🚗 Transport', formation:'📚 Formation' };
+            return labels[k] || k;
+        }
+
+        function toggleNavbar() {
+            document.getElementById('navbarNav').classList.toggle('show');
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('#aidesTab .nav-link').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            document.querySelectorAll('#aidesTabContent .tab-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(tabName + '-content').classList.add('active');
+        }
+
+        function showAlert(msg, type) {
+            const a = document.createElement('div');
+            a.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3`;
+            a.style.zIndex = '9999';
+            a.innerHTML = msg + '<button type="button" class="btn-close" onclick="this.parentElement.remove()">×</button>';
+            document.body.appendChild(a);
+            setTimeout(() => a.remove(), 5000);
+        }
+
+        window.toggleNavbar = toggleNavbar;
+        window.switchTab = switchTab;
+
+        initApp();
+    })();
+</script>
 </body>
 </html>
