@@ -6,8 +6,6 @@
     <title>ROME Pro - Orientation officielle</title>
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SheetJS pour lire les fichiers Excel -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         /* (Conservez tout le CSS inchangé) */
         :root {
@@ -765,8 +763,42 @@
                         <li class="nav-item"><button class="nav-link" onclick="switchTab('juridique')">⚖️ Juridique</button></li>
                     </ul>
                     <div class="tab-content" id="aidesTabContent">
-                        <div class="tab-pane active" id="logement-content"><div class="row">...</div></div>
-                        <!-- (contenu identique à avant, tronqué pour lisibilité) -->
+                        <div class="tab-pane active" id="logement-content">
+                            <div class="row">
+                                <div class="col-md-6"><div class="solution-card"><h6>Action Logement</h6><p>Aide à la mobilité, garantie Visale, avance Loca-Pass.</p></div></div>
+                                <div class="col-md-6"><div class="solution-card"><h6>APL / ALS</h6><p>Aides personnalisées au logement selon les ressources.</p></div></div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="enfant-content">
+                            <div class="row">
+                                <div class="col-md-6"><div class="solution-card"><h6>CMG</h6><p>Complément de libre choix du mode de garde (PAJE).</p></div></div>
+                                <div class="col-md-6"><div class="solution-card"><h6>Crèches à horaires élargis</h6><p>Places réservées pour les parents en insertion.</p></div></div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="sante-content">
+                            <div class="row">
+                                <div class="col-md-6"><div class="solution-card"><h6>CMU-C / ACS</h6><p>Couverture maladie universelle complémentaire.</p></div></div>
+                                <div class="col-md-6"><div class="solution-card"><h6>PASS</h6><p>Permanences d'accès aux soins de santé.</p></div></div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="transport-content">
+                            <div class="row">
+                                <div class="col-md-6"><div class="solution-card"><h6>Aide au permis</h6><p>Permis à 1€ par jour, aide France Travail.</p></div></div>
+                                <div class="col-md-6"><div class="solution-card"><h6>Forfait mobilités durables</h6><p>Prime pour l'utilisation de transports propres.</p></div></div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="formationAide-content">
+                            <div class="row">
+                                <div class="col-md-6"><div class="solution-card"><h6>CPF</h6><p>Compte personnel de formation, utilisable toute la vie.</p></div></div>
+                                <div class="col-md-6"><div class="solution-card"><h6>POEC / POEI</h6><p>Préparation opérationnelle à l'emploi collective/individuelle.</p></div></div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="juridique-content">
+                            <div class="row">
+                                <div class="col-md-6"><div class="solution-card"><h6>Consultation gratuite avocat</h6><p>Permanences dans les maisons de justice.</p></div></div>
+                                <div class="col-md-6"><div class="solution-card"><h6>Aide juridictionnelle</h6><p>Prise en charge des frais de justice.</p></div></div>
+                            </div>
+                        </div>
                     </div>
                     <div class="alert alert-warning mt-4"><i class="fas fa-exclamation-triangle me-2"></i><strong>Pour connaître vos droits précis :</strong> Contactez France Travail au 39 49 ou consultez votre conseiller.</div>
                 </div>
@@ -807,14 +839,14 @@
     <script>
         (function() {
             let romeData = {
-                metiers: [],
-                fiches: new Set(),
-                domaines: new Map(),
-                centresInteret: []
+                metiers: [],          // { codeOGR, libelle, domaine }
+                fiches: new Set(),    // codes uniques des fiches (on utilisera codeOGR)
+                domaines: new Map(),  // Map domaine -> { code, libelle, count }
+                centresInteret: []     // liste des centres d'intérêt (peupler si disponible)
             };
-            let romeToFormation = new Map();
+            let romeToFormation = new Map(); // Map codeOGR -> [codes formation]
 
-            const LOAD_TIMEOUT = 4000; // 4 secondes
+            const LOAD_TIMEOUT = 4000;
 
             async function initApp() {
                 const timeoutId = setTimeout(() => {
@@ -825,7 +857,31 @@
                 }, LOAD_TIMEOUT);
 
                 try {
-                    await loadAllData();
+                    // Charger les 5 fichiers JSON
+                    const [resp1, resp2, resp3, resp4, resp5] = await Promise.all([
+                        fetch('data/converted1.json').catch(() => null),
+                        fetch('data/converted2.json').catch(() => null),
+                        fetch('data/converted3.json').catch(() => null),
+                        fetch('data/converted4.json').catch(() => null),
+                        fetch('data/converted5.json').catch(() => null)
+                    ]);
+
+                    // Vérifier qu'au moins un fichier contenant des métiers (converted5) est chargé
+                    if (!resp5 || !resp5.ok) {
+                        throw new Error('Fichier converted5.json manquant ou inaccessible');
+                    }
+
+                    const data5 = await resp5.json();
+                    processConverted5(data5);
+
+                    // Optionnel : on peut utiliser converted2 pour les domaines, mais on a déjà les domaines via les codes
+                    if (resp2 && resp2.ok) {
+                        const data2 = await resp2.json();
+                        processConverted2(data2);
+                    }
+
+                    // converted1,3,4 ne sont pas essentiels pour l'instant, on peut les ignorer
+
                     clearTimeout(timeoutId);
                     updateUI();
                     showAlert('Données chargées avec succès', 'success');
@@ -841,151 +897,115 @@
                 document.getElementById('updateDate').textContent = new Date().toLocaleDateString('fr-FR');
             }
 
-            async function loadAllData() {
-                const basePath = 'data/';
-                // Vérification individuelle des fichiers
-                const results = await Promise.allSettled([
-                    fetch(basePath + 'FCod.xls').then(r => { if (!r.ok) throw new Error('FCod.xls manquant'); return r.arrayBuffer(); }),
-                    fetch(basePath + 'RomeFCod.xls').then(r => { if (!r.ok) throw new Error('RomeFCod.xls manquant'); return r.arrayBuffer(); }),
-                    fetch(basePath + 'GDom.xls').then(r => { if (!r.ok) throw new Error('GDom.xls manquant'); return r.arrayBuffer(); }),
-                    fetch(basePath + 'ROME_arbo_centres_2025.xlsx').then(r => { if (!r.ok) throw new Error('ROME_arbo_centres_2025.xlsx manquant'); return r.arrayBuffer(); })
-                ]);
+            function processConverted5(data) {
+                // data est un tableau d'objets
+                const metiersMap = new Map(); // pour éviter les doublons
+                const formationMap = new Map();
 
-                // Si tous les fichiers échouent, on lance une erreur
-                const allFailed = results.every(r => r.status === 'rejected');
-                if (allFailed) {
-                    throw new Error('Aucun fichier de données trouvé');
-                }
+                data.forEach(item => {
+                    // On parcourt les clés de l'objet
+                    const keys = Object.keys(item);
+                    // On identifie les deux clés qui sont des codes ROME (ex: "A1101")
+                    const codeKeys = keys.filter(k => /^[A-Z]\d{4}$/.test(k));
+                    if (codeKeys.length < 2) return; // besoin d'au moins deux codes
 
-                // Traitement des fichiers disponibles
-                if (results[0].status === 'fulfilled') {
-                    const wbPrincipal = XLSX.read(results[0].value, { type: 'array' });
-                    const sheetPrincipal = wbPrincipal.Sheets[wbPrincipal.SheetNames[0]];
-                    const rowsPrincipal = XLSX.utils.sheet_to_json(sheetPrincipal, { header: 1 });
-                    processPrincipalData(rowsPrincipal);
-                } else {
-                    console.warn('FCod.xls non chargé');
-                }
+                    const code1 = codeKeys[0];
+                    const code2 = codeKeys[1];
+                    const libelle1 = item[code1];
+                    const libelle2 = item[code2];
 
-                if (results[1].status === 'fulfilled') {
-                    const wbRomeCod = XLSX.read(results[1].value, { type: 'array' });
-                    const sheetRomeCod = wbRomeCod.Sheets[wbRomeCod.SheetNames[0]];
-                    const rowsRomeCod = XLSX.utils.sheet_to_json(sheetRomeCod, { header: 1 });
-                    processRomeCodData(rowsRomeCod);
-                } else {
-                    console.warn('RomeFCod.xls non chargé');
-                }
+                    // Les deux autres clés sont les listes de codes formation (celles avec des $)
+                    const listKeys = keys.filter(k => k.includes('$') || (typeof item[k] === 'string' && item[k].includes('$')));
+                    // On prend les deux premières (ordre probablement 1 puis 2)
+                    const list1 = listKeys[0] ? item[listKeys[0]] : '';
+                    const list2 = listKeys[1] ? item[listKeys[1]] : '';
 
-                if (results[2].status === 'fulfilled') {
-                    const wbGdom = XLSX.read(results[2].value, { type: 'array' });
-                    const sheetGdom = wbGdom.Sheets[wbGdom.SheetNames[0]];
-                    const rowsGdom = XLSX.utils.sheet_to_json(sheetGdom, { header: 1 });
-                    processGdomData(rowsGdom);
-                } else {
-                    console.warn('GDom.xls non chargé');
-                }
+                    // Fonction pour extraire les codes formation d'une chaîne comme "AGROEQUIPEMENT 21032$BUCHERONNAGE 21043$..."
+                    const extractCodes = (str) => {
+                        if (!str) return [];
+                        return str.split('$')
+                            .map(part => part.trim().split(' ').pop()) // prend le dernier mot qui est le code
+                            .filter(c => /^\d+$/.test(c));
+                    };
 
-                if (results[3].status === 'fulfilled') {
-                    const wbCentres = XLSX.read(results[3].value, { type: 'array' });
-                    const centreSheetName = wbCentres.SheetNames.find(name => 
-                        name.toLowerCase().includes('centre')
-                    );
-                    if (centreSheetName) {
-                        const sheetCentre = wbCentres.Sheets[centreSheetName];
-                        const rowsCentre = XLSX.utils.sheet_to_json(sheetCentre, { header: 1 });
-                        processCentresData(rowsCentre);
-                    } else {
-                        console.warn('Onglet centres d\'intérêt non trouvé dans ROME_arbo_centres_2025.xlsx');
+                    const codesForm1 = extractCodes(list1);
+                    const codesForm2 = extractCodes(list2);
+
+                    // Ajouter le métier 1
+                    if (!metiersMap.has(code1)) {
+                        metiersMap.set(code1, {
+                            codeOGR: code1,
+                            libelle: libelle1,
+                            domaine: code1[0] // première lettre
+                        });
                     }
-                } else {
-                    console.warn('ROME_arbo_centres_2025.xlsx non chargé');
-                }
-            }
-
-            function processPrincipalData(rows) {
-                let currentDomaine = '';
-                let seen = new Set();
-                rows.forEach((row, idx) => {
-                    if (idx < 4) return;
-                    const codeDomaine = row[0] || '';
-                    const codeSous = row[1] || '';
-                    const codeFiche = row[2] || '';
-                    const libelle = row[3] || '';
-                    const codeOGR = row[4] ? String(row[4]).trim() : '';
-
-                    if (codeDomaine && !codeSous && !codeFiche && libelle) {
-                        currentDomaine = codeDomaine;
-                        if (!romeData.domaines.has(codeDomaine)) {
-                            romeData.domaines.set(codeDomaine, { code: codeDomaine, libelle, count: 0 });
-                        }
+                    // Ajouter le métier 2
+                    if (!metiersMap.has(code2)) {
+                        metiersMap.set(code2, {
+                            codeOGR: code2,
+                            libelle: libelle2,
+                            domaine: code2[0]
+                        });
                     }
-                    if (codeOGR && libelle) {
-                        const key = `${libelle}|${codeOGR}`;
-                        if (!seen.has(key)) {
-                            seen.add(key);
-                            romeData.metiers.push({ libelle, codeOGR, codeFiche, domaine: currentDomaine });
-                            if (codeFiche) romeData.fiches.add(codeFiche);
-                            if (currentDomaine && romeData.domaines.has(currentDomaine)) {
-                                romeData.domaines.get(currentDomaine).count++;
-                            }
-                        }
+
+                    // Ajouter les formations pour code1
+                    if (codesForm1.length) {
+                        if (!formationMap.has(code1)) formationMap.set(code1, []);
+                        formationMap.get(code1).push(...codesForm1);
                     }
+                    // Ajouter les formations pour code2
+                    if (codesForm2.length) {
+                        if (!formationMap.has(code2)) formationMap.set(code2, []);
+                        formationMap.get(code2).push(...codesForm2);
+                    }
+                });
+
+                // Remplir romeData.metiers
+                romeData.metiers = Array.from(metiersMap.values());
+                // Remplir romeData.fiches avec les codes uniques
+                romeData.fiches = new Set(romeData.metiers.map(m => m.codeOGR));
+                // Remplir romeToFormation en dédoublonnant les codes
+                formationMap.forEach((codes, code) => {
+                    romeToFormation.set(code, [...new Set(codes)]);
+                });
+                // Compter les métiers par domaine
+                const domainCount = new Map();
+                romeData.metiers.forEach(m => {
+                    const d = m.domaine;
+                    domainCount.set(d, (domainCount.get(d) || 0) + 1);
+                });
+                // Construire la map des domaines avec des libellés génériques (on pourrait prendre ceux de converted2)
+                domainCount.forEach((count, code) => {
+                    romeData.domaines.set(code, {
+                        code,
+                        libelle: `Domaine ${code}`,
+                        count
+                    });
                 });
             }
 
-            function processCentresData(rows) {
-                let currentCentre = null;
-                for (let i = 0; i < rows.length; i++) {
-                    const row = rows[i];
-                    const colA = row[0] ? String(row[0]).trim() : '';
-                    const colB = row[1] ? String(row[1]).trim() : '';
-                    const colC = row[2] ? String(row[2]).trim() : '';
-
-                    if (colB && !colA && colB.includes('J\'')) {
-                        if (currentCentre) romeData.centresInteret.push(currentCentre);
-                        currentCentre = {
-                            libelle: colB,
-                            description: colC || '',
-                            codesRome: []
-                        };
-                    } else if (currentCentre && colA && /^[A-Z]\d{4}$/.test(colA)) {
-                        currentCentre.codesRome.push(colA);
-                    }
-                }
-                if (currentCentre) romeData.centresInteret.push(currentCentre);
-            }
-
-            function processRomeCodData(rows) {
-                rows.forEach((row, idx) => {
-                    if (idx < 1) return;
-                    const codeRome = row[0] ? String(row[0]).trim() : '';
-                    if (!codeRome) return;
-                    const codes = [];
-                    for (let i = 1; i < row.length; i++) {
-                        if (row[i] && typeof row[i] === 'string') {
-                            row[i].split('$').forEach(p => {
-                                const c = p.trim();
-                                if (c && /^\d+$/.test(c)) codes.push(c);
-                            });
+            function processConverted2(data) {
+                // On pourrait améliorer les libellés des domaines
+                data.forEach(item => {
+                    if (item.GRD === 'GRD' && item.A0) {
+                        const code = item.A0;
+                        const libelle = item["DEVELOPPEMENT DES COMPETENCES"];
+                        if (code && libelle && romeData.domaines.has(code)) {
+                            romeData.domaines.get(code).libelle = libelle;
                         }
                     }
-                    if (codes.length) romeToFormation.set(codeRome, codes);
                 });
-            }
-
-            function processGdomData(rows) {
-                // optionnel
             }
 
             function loadFallbackData() {
                 romeData.metiers = [
-                    { libelle: 'Développeur informatique', codeOGR: 'M1805', codeFiche: 'M1805', domaine: 'M' },
-                    { libelle: 'Infirmier', codeOGR: 'J1506', codeFiche: 'J1506', domaine: 'J' },
-                    { libelle: 'Commercial', codeOGR: 'D1405', codeFiche: 'D1405', domaine: 'D' },
-                    { libelle: 'Assistant administratif', codeOGR: 'M1607', codeFiche: 'M1607', domaine: 'M' },
-                    { libelle: 'Conducteur routier', codeOGR: 'N4101', codeFiche: 'N4101', domaine: 'N' }
+                    { codeOGR: 'M1805', libelle: 'Développeur informatique', domaine: 'M' },
+                    { codeOGR: 'J1506', libelle: 'Infirmier', domaine: 'J' },
+                    { codeOGR: 'D1405', libelle: 'Commercial', domaine: 'D' },
+                    { codeOGR: 'M1607', libelle: 'Assistant administratif', domaine: 'M' },
+                    { codeOGR: 'N4101', libelle: 'Conducteur routier', domaine: 'N' }
                 ];
-                romeData.fiches = new Set(romeData.metiers.map(m => m.codeFiche));
+                romeData.fiches = new Set(romeData.metiers.map(m => m.codeOGR));
                 romeData.domaines.set('A', { code: 'A', libelle: 'Agriculture', count: 0 });
                 romeData.domaines.set('B', { code: 'B', libelle: 'Arts', count: 0 });
                 romeData.domaines.set('C', { code: 'C', libelle: 'Banque', count: 0 });
@@ -1108,7 +1128,7 @@
                     let score = 0, max = 0;
                     if (secteur) {
                         max += 30;
-                        if (m.libelle.toLowerCase().includes(secteur) || (m.codeOGR && m.codeOGR.toLowerCase().includes(secteur[0]))) score += 30;
+                        if (m.libelle.toLowerCase().includes(secteur) || (m.domaine && m.domaine.toLowerCase() === secteur[0])) score += 30;
                     }
                     competences.forEach(c => {
                         max += 10;
@@ -1119,13 +1139,7 @@
                         if (s === 'communication' && m.libelle.toLowerCase().includes('commercial')) score += 5;
                         if (s === 'organisation' && m.libelle.toLowerCase().includes('assistant')) score += 5;
                     });
-                    if (centre) {
-                        const centreObj = romeData.centresInteret.find(c => c.libelle === centre);
-                        if (centreObj && centreObj.codesRome.includes(m.codeOGR)) {
-                            max += 20;
-                            score += 20;
-                        }
-                    }
+                    // centre d'intérêt : on a peu de données, on ignore
                     return { ...m, score: max ? Math.round((score/max)*100) : 0 };
                 }).sort((a,b) => b.score - a.score).slice(0,10);
 
